@@ -46,34 +46,21 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
     setSaved(false)
   }
 
-  const requestAiAndSave = async (activeSpread: Spread, queue: DrawnCard[]) => {
-    setAiLoading(true)
-    setAiError('')
-    const cardPayload = queue.map((d, i) => ({
-      position: activeSpread.positions[i].label,
-      cardId: d.card.id,
-      cardName: d.card.nameKo,
-      reversed: d.reversed,
-    }))
-    let aiResult: string | null = null
-    try {
-      aiResult = await fetchAiInterpretation({ spreadName: activeSpread.nameKo, question, cards: cardPayload })
-      setAiText(aiResult)
-    } catch (err) {
-      setAiError(err instanceof Error ? err.message : '해석을 불러오지 못했어요.')
-    } finally {
-      setAiLoading(false)
-    }
-
+  const saveBaseReading = async (activeSpread: Spread, queue: DrawnCard[]) => {
     const record: ReadingRecord = {
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
       spreadId: activeSpread.id,
       spreadName: activeSpread.nameKo,
       question,
-      cards: cardPayload,
+      cards: queue.map((d, i) => ({
+        position: activeSpread.positions[i].label,
+        cardId: d.card.id,
+        cardName: d.card.nameKo,
+        reversed: d.reversed,
+      })),
       baseInterpretation: buildBaseInterpretation(activeSpread, queue),
-      aiInterpretation: aiResult,
+      aiInterpretation: null,
     }
     try {
       await saveReading(record)
@@ -92,11 +79,11 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
     const nextCount = revealCount + 1
     setRevealCount(nextCount)
     if (nextCount === queue.length) {
-      void requestAiAndSave(spread, queue)
+      void saveBaseReading(spread, queue)
     }
   }
 
-  const retryAi = async () => {
+  const askAi = async () => {
     if (!spread || !preparedDraw) return
     setAiLoading(true)
     setAiError('')
@@ -206,11 +193,14 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
           <div className="ai-box ai-box-primary">
             <span className="eyebrow">{question ? '질문에 대한 답변' : '오늘의 메시지'}</span>
             {aiText && <p>{aiText}</p>}
+            {!aiText && !aiLoading && !aiError && (
+              <button className="secondary-button" onClick={askAi}>AI 상담사에게 더 물어보기</button>
+            )}
             {aiLoading && <p className="loading">별빛 상담사가 카드를 살펴보며 질문에 대한 답을 찾고 있어요...</p>}
             {aiError && (
               <>
                 <p className="ai-error">{aiError}</p>
-                <button className="secondary-button" onClick={retryAi}>다시 시도</button>
+                <button className="secondary-button" onClick={askAi}>다시 시도</button>
               </>
             )}
           </div>
