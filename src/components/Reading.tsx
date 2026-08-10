@@ -26,8 +26,7 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
   const [aiError, setAiError] = useState('')
   const [saved, setSaved] = useState(false)
 
-  const chooseSpread = (s: Spread) => {
-    setSpread(s)
+  const clearDraw = () => {
     setQuestion('')
     setPreparedDraw(null)
     setRevealCount(0)
@@ -36,14 +35,18 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
     setSaved(false)
   }
 
+  const chooseSpread = (s: Spread) => {
+    setSpread(s)
+    clearDraw()
+  }
+
+  const redraw = () => {
+    clearDraw()
+  }
+
   const reset = () => {
     setSpread(null)
-    setQuestion('')
-    setPreparedDraw(null)
-    setRevealCount(0)
-    setAiText(null)
-    setAiError('')
-    setSaved(false)
+    clearDraw()
   }
 
   const saveBaseReading = async (activeSpread: Spread, queue: DrawnCard[]) => {
@@ -226,7 +229,7 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
           )}
           {loggedIn && saved && <p className="disclaimer">상담 기록이 저장됐어요. 히스토리 탭에서 다시 볼 수 있어요.</p>}
           <div className="action-row">
-            <button className="secondary-button" onClick={reset}>다시 뽑기</button>
+            <button className="secondary-button" onClick={redraw}>다시 뽑기</button>
           </div>
         </>
       )}
