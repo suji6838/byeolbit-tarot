@@ -31,6 +31,7 @@ em{font-style:normal;color:var(--color-primary)}
 .question-box .hint{color:var(--color-muted);font-size:11px;margin-top:6px}
 .deck-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:20px 0 10px;text-align:center}
 .deck-pile{position:relative;width:120px;height:180px;cursor:pointer}
+.deck-pile.disabled{cursor:not-allowed;opacity:.45}
 .deck-pile .deck-back{position:absolute;inset:0;border-radius:14px;background:linear-gradient(135deg,#2a2458,#1c1a3d);border:2px solid var(--color-primary);box-shadow:0 10px 30px rgba(0,0,0,.4);display:grid;place-items:center;font-size:30px;color:var(--color-primary)}
 .deck-pile .deck-back:nth-child(1){transform:rotate(-4deg) translateY(4px)}
 .deck-pile .deck-back:nth-child(2){transform:rotate(3deg) translateY(2px)}

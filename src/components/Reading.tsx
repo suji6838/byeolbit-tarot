@@ -48,6 +48,7 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
 
   const revealNext = async () => {
     if (!spread) return
+    if (revealCount === 0 && !question.trim()) return
     const queue = preparedDraw ?? drawCards(spread.positions.length)
     if (!preparedDraw) setPreparedDraw(queue)
     if (revealCount >= queue.length) return
@@ -142,7 +143,7 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
 
       {revealCount === 0 && (
         <div className="question-box">
-          <label htmlFor="question">궁금한 것을 적어주세요 (선택)</label>
+          <label htmlFor="question">궁금한 것을 적어주세요</label>
           <textarea
             id="question"
             value={question}
@@ -150,7 +151,7 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
             placeholder="예: 요즘 진로 고민이 많아요. 어떤 방향이 좋을까요?"
             maxLength={500}
           />
-          <p className="hint">비워두면 오늘의 전반적인 흐름으로 해석해 드려요.</p>
+          <p className="hint">질문을 입력해야 카드를 뽑을 수 있어요.</p>
         </div>
       )}
 
@@ -164,14 +165,22 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
 
       {!allRevealed && (
         <div className="deck-stage">
-          <div className="deck-pile" onClick={revealNext} role="button" aria-label="카드 뽑기">
+          <div
+            className={`deck-pile${revealCount === 0 && !question.trim() ? ' disabled' : ''}`}
+            onClick={revealNext}
+            role="button"
+            aria-disabled={revealCount === 0 && !question.trim()}
+            aria-label="카드 뽑기"
+          >
             <div className="deck-back">✦</div>
             <div className="deck-back">✦</div>
             <div className="deck-back">✦</div>
           </div>
           <p className="deck-hint">
             {revealCount === 0
-              ? `카드 더미를 눌러 첫 번째 카드를 뽑아보세요. (${total}장 중 1번째: ${spread.positions[0].label})`
+              ? question.trim()
+                ? `카드 더미를 눌러 첫 번째 카드를 뽑아보세요. (${total}장 중 1번째: ${spread.positions[0].label})`
+                : '질문을 먼저 입력해 주세요.'
               : `카드 더미를 눌러 다음 카드를 뽑아보세요. (${revealCount}/${total}장, 다음: ${spread.positions[revealCount].label})`}
           </p>
         </div>
