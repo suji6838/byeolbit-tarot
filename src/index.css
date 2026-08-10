@@ -59,6 +59,8 @@ em{font-style:normal;color:var(--color-primary)}
 .ai-box p{color:var(--color-text);font-size:14px;line-height:1.75;white-space:pre-wrap}
 .ai-box .loading{color:var(--color-muted);font-size:13px}
 .ai-box .ai-error{color:#e39a9a;font-size:13px}
+.ai-box-primary{margin-top:24px;border:1px solid var(--color-primary);padding:22px}
+.ai-box-primary p{font-size:15px}
 .action-row{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
 .disclaimer{font-size:11px;line-height:1.6;color:var(--color-muted);margin:20px 3px}
 .history-list{display:grid;gap:12px;margin-top:18px}
