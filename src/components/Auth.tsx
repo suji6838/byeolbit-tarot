@@ -47,10 +47,9 @@ export default function Auth({ onClose, onComplete, member, onLogout }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [agreedBefore, setAgreedBefore] = useState(() => localStorage.getItem(CONSENT_KEY) === '1')
-  const [agreeTerms, setAgreeTerms] = useState(false)
-  const [agreePrivacy, setAgreePrivacy] = useState(false)
+  const [agreeAll, setAgreeAll] = useState(false)
   const [legalView, setLegalView] = useState<'terms' | 'privacy' | null>(null)
-  const readyForAuth = agreedBefore || (agreeTerms && agreePrivacy)
+  const readyForAuth = agreedBefore || agreeAll
   const markAgreed = () => {
     localStorage.setItem(CONSENT_KEY, '1')
     setAgreedBefore(true)
@@ -193,12 +192,12 @@ export default function Auth({ onClose, onComplete, member, onLogout }: Props) {
           <div className="consent-box">
             <p className="consent-title">시작하기 전에 약관에 동의해 주세요.</p>
             <label className="consent-row">
-              <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} />
-              <span>[필수] <button type="button" className="legal-link" onClick={() => setLegalView('terms')}>이용약관</button>에 동의합니다.</span>
-            </label>
-            <label className="consent-row">
-              <input type="checkbox" checked={agreePrivacy} onChange={(e) => setAgreePrivacy(e.target.checked)} />
-              <span>[필수] <button type="button" className="legal-link" onClick={() => setLegalView('privacy')}>개인정보 수집·이용</button>에 동의합니다. (질문/카드 결과 등 상담 관련 정보 포함)</span>
+              <input type="checkbox" checked={agreeAll} onChange={(e) => setAgreeAll(e.target.checked)} />
+              <span>
+                [필수] <button type="button" className="legal-link" onClick={() => setLegalView('terms')}>이용약관</button> 및{' '}
+                <button type="button" className="legal-link" onClick={() => setLegalView('privacy')}>개인정보 수집·이용</button>에 동의합니다.
+                (질문/카드 결과 등 상담 관련 정보 포함)
+              </span>
             </label>
           </div>
         )}
