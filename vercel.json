@@ -9,10 +9,10 @@
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=()" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(self)" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: https://lh3.googleusercontent.com https://*.googleusercontent.com; font-src 'self'; connect-src 'self' https://*.supabase.co https://accounts.google.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+          "value": "default-src 'self'; script-src 'self' https://accounts.google.com https://js.tosspayments.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: https://lh3.googleusercontent.com https://*.googleusercontent.com; font-src 'self'; connect-src 'self' https://*.supabase.co https://accounts.google.com https://api.tosspayments.com https://event.tosspayments.com; frame-src https://accounts.google.com https://js.tosspayments.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
         }
       ]
     }

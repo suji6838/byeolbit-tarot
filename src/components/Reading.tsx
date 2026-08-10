@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { SPREADS, Spread, TarotCard, drawCards } from '../data'
 import TarotCardView from './TarotCardView'
-import { fetchAiInterpretation } from '../lib/interpret'
+import { InsufficientCoinsError, fetchAiInterpretation } from '../lib/interpret'
 import { Reading as ReadingRecord, saveReading } from '../lib/readings'
-import { hasUsedAi, markAiUsed } from '../lib/aiUsage'
 
 type DrawnCard = { card: TarotCard; reversed: boolean }
 
@@ -17,7 +16,13 @@ function buildBaseInterpretation(spread: Spread, drawn: DrawnCard[]): string {
     .join('\n')
 }
 
-export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean; onRequireAuth: () => void }) {
+type Props = {
+  loggedIn: boolean
+  onRequireAuth: () => void
+  onRequireCharge: () => void
+}
+
+export default function Reading({ loggedIn, onRequireAuth, onRequireCharge }: Props) {
   const [spread, setSpread] = useState<Spread | null>(null)
   const [question, setQuestion] = useState('')
   const [preparedDraw, setPreparedDraw] = useState<DrawnCard[] | null>(null)
@@ -25,9 +30,10 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
   const [fanPool, setFanPool] = useState<DrawnCard[] | null>(null)
   const [pickedIndices, setPickedIndices] = useState<number[]>([])
   const [aiText, setAiText] = useState<string | null>(null)
+  const [aiMethod, setAiMethod] = useState<'free' | 'paid' | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
-  const [aiUsedBefore, setAiUsedBefore] = useState(false)
+  const [insufficientCoins, setInsufficientCoins] = useState(false)
   const [saved, setSaved] = useState(false)
 
   const clearDraw = (targetSpread: Spread | null) => {
@@ -37,8 +43,9 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
     setPickedIndices([])
     setFanPool(targetSpread?.pickMode === 'fan' ? drawCards(targetSpread.fanSize ?? 9) : null)
     setAiText(null)
+    setAiMethod(null)
     setAiError('')
-    setAiUsedBefore(false)
+    setInsufficientCoins(false)
     setSaved(false)
   }
 
@@ -116,12 +123,10 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
     if (!cards || cards.length === 0) return
     setAiLoading(true)
     setAiError('')
+    setInsufficientCoins(false)
     try {
-      if (await hasUsedAi(spread.id)) {
-        setAiUsedBefore(true)
-        return
-      }
-      const text = await fetchAiInterpretation({
+      const result = await fetchAiInterpretation({
+        spreadId: spread.id,
         spreadName: spread.nameKo,
         question,
         cards: cards.map((d, i) => ({
@@ -131,23 +136,19 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
           reversed: d.reversed,
         })),
       })
-      setAiText(text)
-      await markAiUsed(spread.id)
+      setAiText(result.interpretation)
+      setAiMethod(result.method)
     } catch (err) {
-      setAiError(err instanceof Error ? err.message : '해석을 불러오지 못했어요.')
+      if (err instanceof InsufficientCoinsError) {
+        setInsufficientCoins(true)
+        setAiError(err.message)
+      } else {
+        setAiError(err instanceof Error ? err.message : '해석을 불러오지 못했어요.')
+      }
     } finally {
       setAiLoading(false)
     }
   }
-
-  useEffect(() => {
-    if (!spread || !loggedIn) return
-    const total = spread.positions.length
-    const drawnCount = spread.pickMode === 'fan' ? pickedIndices.length : revealCount
-    if (total > 0 && drawnCount === total) {
-      hasUsedAi(spread.id).then(setAiUsedBefore)
-    }
-  }, [spread, loggedIn, pickedIndices.length, revealCount])
 
   if (!spread) {
     return (
@@ -277,11 +278,15 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
             ))}
             <div className="ai-box">
               <span className="eyebrow">AI 상담사의 한마디</span>
-              {aiText && <p>{aiText}</p>}
-              {!aiText && !aiLoading && !aiError && aiUsedBefore && (
-                <p className="ai-error">이 스프레드는 계정당 1회 무료로 이미 사용하셨어요.</p>
+              {aiText && (
+                <>
+                  <p>{aiText}</p>
+                  <p className="hint">
+                    {aiMethod === 'paid' ? '코인 10개를 사용했어요.' : '오늘의 무료 해석을 사용했어요.'}
+                  </p>
+                </>
               )}
-              {!aiText && !aiLoading && !aiError && !aiUsedBefore && (
+              {!aiText && !aiLoading && !aiError && (
                 <button className="secondary-button" onClick={askAi}>
                   {loggedIn ? 'AI 상담사에게 더 물어보기' : '로그인하고 AI 상담 받기'}
                 </button>
@@ -290,7 +295,11 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
               {aiError && (
                 <>
                   <p className="ai-error">{aiError}</p>
-                  <button className="secondary-button" onClick={askAi}>다시 시도</button>
+                  {insufficientCoins ? (
+                    <button className="secondary-button" onClick={onRequireCharge}>코인 충전하기</button>
+                  ) : (
+                    <button className="secondary-button" onClick={askAi}>다시 시도</button>
+                  )}
                 </>
               )}
             </div>
