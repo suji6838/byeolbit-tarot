@@ -190,20 +190,6 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
 
       {allRevealed && (
         <>
-          <div className="ai-box ai-box-primary">
-            <span className="eyebrow">{question ? '질문에 대한 답변' : '오늘의 메시지'}</span>
-            {aiText && <p>{aiText}</p>}
-            {!aiText && !aiLoading && !aiError && (
-              <button className="secondary-button" onClick={askAi}>AI 상담사에게 더 물어보기</button>
-            )}
-            {aiLoading && <p className="loading">별빛 상담사가 카드를 살펴보며 질문에 대한 답을 찾고 있어요...</p>}
-            {aiError && (
-              <>
-                <p className="ai-error">{aiError}</p>
-                <button className="secondary-button" onClick={askAi}>다시 시도</button>
-              </>
-            )}
-          </div>
           <div className="result-section">
             <h2>카드별 기본 의미</h2>
             {drawn.map((d, i) => (
@@ -214,6 +200,20 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
                 <p>{d.reversed ? d.card.meaningReversed : d.card.meaningUpright}</p>
               </div>
             ))}
+            <div className="ai-box">
+              <span className="eyebrow">AI 상담사의 한마디</span>
+              {aiText && <p>{aiText}</p>}
+              {!aiText && !aiLoading && !aiError && (
+                <button className="secondary-button" onClick={askAi}>AI 상담사에게 더 물어보기</button>
+              )}
+              {aiLoading && <p className="loading">별빛 상담사가 카드를 살펴보며 질문에 대한 답을 찾고 있어요...</p>}
+              {aiError && (
+                <>
+                  <p className="ai-error">{aiError}</p>
+                  <button className="secondary-button" onClick={askAi}>다시 시도</button>
+                </>
+              )}
+            </div>
           </div>
           {!loggedIn && (
             <p className="disclaimer">
