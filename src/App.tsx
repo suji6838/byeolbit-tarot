@@ -73,11 +73,12 @@ export default function App() {
         <button className={tab === 'reading' ? 'active' : ''} onClick={() => setTab('reading')}>
           <span>🔮</span>상담
         </button>
-        {member && (
-          <button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}>
-            <span>📜</span>기록
-          </button>
-        )}
+        <button
+          className={tab === 'history' ? 'active' : ''}
+          onClick={() => (member ? setTab('history') : setShowAuth(true))}
+        >
+          <span>📜</span>기록
+        </button>
       </nav>
 
       {showAuth && (
