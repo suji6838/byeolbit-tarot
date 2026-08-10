@@ -6,7 +6,7 @@ function formatDate(iso: string): string {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-export default function History({ loggedIn, onRequireAuth }: { loggedIn: boolean; onRequireAuth: () => void }) {
+export default function History() {
   const [readings, setReadings] = useState<Reading[] | null>(null)
 
   useEffect(() => {
@@ -25,11 +25,6 @@ export default function History({ loggedIn, onRequireAuth }: { loggedIn: boolean
         <div className="empty-orb">🔮</div>
         <h1>아직 상담 기록이 없어요</h1>
         <p>첫 카드를 뽑으면 이곳에 기록이 쌓여요.</p>
-        {!loggedIn && (
-          <button className="secondary-button" onClick={onRequireAuth}>
-            로그인하고 기록 이어서 보기
-          </button>
-        )}
       </div>
     )
   }
@@ -38,15 +33,6 @@ export default function History({ loggedIn, onRequireAuth }: { loggedIn: boolean
     <div className="view">
       <span className="eyebrow">지난 상담</span>
       <h1>나의 상담 기록</h1>
-      {!loggedIn && (
-        <p className="subcopy">
-          지금은 이 기기에만 저장돼요.{' '}
-          <button className="text-button" onClick={onRequireAuth} style={{ display: 'inline' }}>
-            로그인
-          </button>
-          하면 계정에 안전하게 이어서 보관돼요.
-        </p>
-      )}
       <div className="history-list">
         {readings.map((r) => (
           <div className="history-card" key={r.id}>

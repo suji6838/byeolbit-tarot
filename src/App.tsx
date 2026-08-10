@@ -41,6 +41,7 @@ export default function App() {
   const logout = async () => {
     await supabase.auth.signOut()
     setMember(null)
+    setTab('reading')
   }
 
   if (loading) {
@@ -66,15 +67,17 @@ export default function App() {
       </header>
 
       {tab === 'reading' && <Reading key={readingResetKey} loggedIn={!!member} onRequireAuth={() => setShowAuth(true)} />}
-      {tab === 'history' && <History loggedIn={!!member} onRequireAuth={() => setShowAuth(true)} />}
+      {tab === 'history' && member && <History />}
 
       <nav className="tabbar">
         <button className={tab === 'reading' ? 'active' : ''} onClick={() => setTab('reading')}>
           <span>🔮</span>상담
         </button>
-        <button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}>
-          <span>📜</span>기록
-        </button>
+        {member && (
+          <button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}>
+            <span>📜</span>기록
+          </button>
+        )}
       </nav>
 
       {showAuth && (
