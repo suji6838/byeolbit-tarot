@@ -223,7 +223,6 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
             </p>
           )}
           {loggedIn && saved && <p className="disclaimer">상담 기록이 저장됐어요. 히스토리 탭에서 다시 볼 수 있어요.</p>}
-          <p className="disclaimer">이 해석은 성찰과 위로를 돕는 참고용이며, 의료·법률·재정적 결정을 대신하지 않아요.</p>
           <div className="action-row">
             <button className="secondary-button" onClick={reset}>다시 뽑기</button>
           </div>
