@@ -4,7 +4,7 @@ const MAX_CARDS = 10
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST 요청만 허용돼요.' })
 
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) return res.status(503).json({ error: '준비중입니다.' })
 
   const { spreadName, question, cards } = req.body ?? {}
@@ -38,29 +38,28 @@ export default async function handler(req, res) {
   }`
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.8,
-        max_tokens: 500,
-      }),
-    })
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
+        },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+          generationConfig: { temperature: 0.8, maxOutputTokens: 500 },
+        }),
+      }
+    )
     if (!response.ok) {
       const errBody = await response.text()
-      console.error('OpenAI API error:', response.status, errBody)
+      console.error('Gemini API error:', response.status, errBody)
       return res.status(502).json({ error: 'AI 해석 생성에 실패했어요. 잠시 후 다시 시도해 주세요.' })
     }
     const data = await response.json()
-    const interpretation = data.choices?.[0]?.message?.content?.trim()
+    const interpretation = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
     if (!interpretation) return res.status(502).json({ error: 'AI 응답이 비어 있어요.' })
     return res.status(200).json({ interpretation })
   } catch (err) {

@@ -7,7 +7,7 @@
 
 - Vite + React 18 + TypeScript (SPA, 라우터 없이 탭 상태로 전환)
 - `@supabase/supabase-js` — 로그인(구글/이메일) + 상담 기록 저장
-- Vercel Serverless Function(`api/interpret.js`) — OpenAI API를 호출해 AI 보강 해석 생성
+- Vercel Serverless Function(`api/interpret.js`) — Google Gemini API(무료 티어)를 호출해 AI 보강 해석 생성
 - 배포: Vercel
 
 ## 로컬에서 실행하기 전에 반드시 해야 할 설정
@@ -28,11 +28,12 @@
 3. 발급받은 클라이언트 ID를 `src/config.ts`의 `GOOGLE_CLIENT_ID`에 입력
 4. Supabase 대시보드 Authentication → Providers → Google에도 같은 클라이언트 ID/시크릿 등록
 
-### 3. OpenAI API 키 (AI 해석 기능)
+### 3. Gemini API 키 (AI 해석 기능, 무료)
 
-- `api/interpret.js`가 `process.env.OPENAI_API_KEY`를 사용합니다.
-- 로컬 개발 시: 프로젝트 루트에 `.env`(gitignore됨) 만들고 `OPENAI_API_KEY=sk-...` 추가 후 `vercel dev`로 실행하거나, Vercel 배포 환경에서만 테스트
-- Vercel 배포 시: 프로젝트 Settings → Environment Variables에 `OPENAI_API_KEY` 추가 필수 (없으면 AI 해석 버튼이 에러를 반환함, 기본 카드 해석은 정상 작동)
+- `api/interpret.js`가 `process.env.GEMINI_API_KEY`를 사용해 Google Gemini(`gemini-2.0-flash`) API를 호출합니다.
+- https://aistudio.google.com/apikey 에서 신용카드 없이 무료로 키 발급 가능 (무료 티어 사용량 한도 내에서 과금 없음)
+- 로컬 개발 시: 프로젝트 루트에 `.env`(gitignore됨) 만들고 `GEMINI_API_KEY=...` 추가 후 `vercel dev`로 실행하거나, Vercel 배포 환경에서만 테스트
+- Vercel 배포 시: 프로젝트 Settings → Environment Variables에 `GEMINI_API_KEY` 추가 필수 (없으면 AI 해석 버튼이 "준비중입니다"를 반환함, 카드별 기본 해석은 키 없이도 정상 작동)
 
 ### 4. 설치 및 실행
 
@@ -46,7 +47,7 @@ npm run build     # tsc 타입체크 + 프로덕션 빌드
 
 1. GitHub 저장소에 push
 2. https://vercel.com 에서 이 저장소 Import
-3. Environment Variables에 `OPENAI_API_KEY` 등록 (Supabase 키는 `src/config.ts`에 이미 포함되어 있어 별도 등록 불필요 — RLS로 보호되는 공개 키)
+3. Environment Variables에 `GEMINI_API_KEY` 등록 (Supabase 키는 `src/config.ts`에 이미 포함되어 있어 별도 등록 불필요 — RLS로 보호되는 공개 키)
 4. Deploy
 
 ## 참고: 카드 이미지
