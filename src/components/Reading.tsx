@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SPREADS, Spread, TarotCard, drawCards } from '../data'
 import TarotCardView from './TarotCardView'
 import { fetchAiInterpretation } from '../lib/interpret'
 import { Reading as ReadingRecord, saveReading } from '../lib/readings'
+import { hasUsedAi, markAiUsed } from '../lib/aiUsage'
 
 type DrawnCard = { card: TarotCard; reversed: boolean }
 
@@ -26,6 +27,7 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
   const [aiText, setAiText] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
+  const [aiUsedBefore, setAiUsedBefore] = useState(false)
   const [saved, setSaved] = useState(false)
 
   const clearDraw = (targetSpread: Spread | null) => {
@@ -36,6 +38,7 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
     setFanPool(targetSpread?.pickMode === 'fan' ? drawCards(targetSpread.fanSize ?? 9) : null)
     setAiText(null)
     setAiError('')
+    setAiUsedBefore(false)
     setSaved(false)
   }
 
@@ -105,11 +108,19 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
 
   const askAi = async () => {
     if (!spread) return
+    if (!loggedIn) {
+      onRequireAuth()
+      return
+    }
     const cards = spread.pickMode === 'fan' ? (fanPool ? pickedIndices.map((i) => fanPool[i]) : []) : preparedDraw
     if (!cards || cards.length === 0) return
     setAiLoading(true)
     setAiError('')
     try {
+      if (await hasUsedAi(spread.id)) {
+        setAiUsedBefore(true)
+        return
+      }
       const text = await fetchAiInterpretation({
         spreadName: spread.nameKo,
         question,
@@ -121,12 +132,22 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
         })),
       })
       setAiText(text)
+      await markAiUsed(spread.id)
     } catch (err) {
       setAiError(err instanceof Error ? err.message : '해석을 불러오지 못했어요.')
     } finally {
       setAiLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!spread || !loggedIn) return
+    const total = spread.positions.length
+    const drawnCount = spread.pickMode === 'fan' ? pickedIndices.length : revealCount
+    if (total > 0 && drawnCount === total) {
+      hasUsedAi(spread.id).then(setAiUsedBefore)
+    }
+  }, [spread, loggedIn, pickedIndices.length, revealCount])
 
   if (!spread) {
     return (
@@ -257,8 +278,13 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
             <div className="ai-box">
               <span className="eyebrow">AI 상담사의 한마디</span>
               {aiText && <p>{aiText}</p>}
-              {!aiText && !aiLoading && !aiError && (
-                <button className="secondary-button" onClick={askAi}>AI 상담사에게 더 물어보기</button>
+              {!aiText && !aiLoading && !aiError && aiUsedBefore && (
+                <p className="ai-error">이 스프레드는 계정당 1회 무료로 이미 사용하셨어요.</p>
+              )}
+              {!aiText && !aiLoading && !aiError && !aiUsedBefore && (
+                <button className="secondary-button" onClick={askAi}>
+                  {loggedIn ? 'AI 상담사에게 더 물어보기' : '로그인하고 AI 상담 받기'}
+                </button>
               )}
               {aiLoading && <p className="loading">별빛 상담사가 카드를 살펴보며 질문에 대한 답을 찾고 있어요...</p>}
               {aiError && (
