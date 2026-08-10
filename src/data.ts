@@ -179,6 +179,7 @@ export interface Spread {
   nameKo: string
   description: string
   positions: SpreadPosition[]
+  questionPlaceholder: string
 }
 
 export const SPREADS: Spread[] = [
@@ -187,6 +188,7 @@ export const SPREADS: Spread[] = [
     nameKo: '오늘의 카드',
     description: '지금 가장 필요한 메시지를 한 장으로 확인해요.',
     positions: [{ label: '오늘의 메시지', hint: '지금 나에게 필요한 조언' }],
+    questionPlaceholder: '예: 오늘 하루 어떤 마음으로 보내면 좋을까요?',
   },
   {
     id: 'three-card',
@@ -197,6 +199,7 @@ export const SPREADS: Spread[] = [
       { label: '현재', hint: '지금 마주한 상황' },
       { label: '미래', hint: '앞으로의 흐름' },
     ],
+    questionPlaceholder: '예: 요즘 진로 고민이 많아요. 앞으로 어떤 흐름으로 흘러갈까요?',
   },
   {
     id: 'love',
@@ -207,6 +210,7 @@ export const SPREADS: Spread[] = [
       { label: '상대의 마음', hint: '상대가 느끼는 감정' },
       { label: '관계의 방향', hint: '이 관계가 향하는 곳' },
     ],
+    questionPlaceholder: '예: 그 사람과 저, 잘 될 수 있을까요?',
   },
   {
     id: 'choice',
@@ -217,6 +221,7 @@ export const SPREADS: Spread[] = [
       { label: '선택 B', hint: 'B를 선택했을 때' },
       { label: '조언', hint: '결정에 필요한 조언' },
     ],
+    questionPlaceholder: '예: 지금 회사에 남을지, 이직할지 고민이에요.',
   },
 ]
 

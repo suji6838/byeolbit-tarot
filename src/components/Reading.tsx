@@ -153,7 +153,7 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
             id="question"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="예: 요즘 진로 고민이 많아요. 어떤 방향이 좋을까요?"
+            placeholder={spread.questionPlaceholder}
             maxLength={500}
           />
           <p className="hint">질문을 입력해야 카드를 뽑을 수 있어요.</p>
