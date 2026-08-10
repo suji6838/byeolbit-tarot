@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST 요청만 허용돼요.' })
 
   const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) return res.status(500).json({ error: '서버에 OPENAI_API_KEY가 설정되어 있지 않아요.' })
+  if (!apiKey) return res.status(503).json({ error: '준비중입니다.' })
 
   const { spreadName, question, cards } = req.body ?? {}
   if (!Array.isArray(cards) || cards.length === 0 || cards.length > MAX_CARDS) {
