@@ -30,7 +30,7 @@
 
 ### 3. Gemini API 키 (AI 해석 기능, 무료)
 
-- `api/interpret.js`가 `process.env.GEMINI_API_KEY`를 사용해 Google Gemini(`gemini-2.0-flash`) API를 호출합니다.
+- `api/interpret.js`가 `process.env.GEMINI_API_KEY`를 사용해 Google Gemini(`gemini-flash-lite-latest` — 항상 최신 경량 모델을 가리키는 별칭) API를 호출합니다.
 - https://aistudio.google.com/apikey 에서 신용카드 없이 무료로 키 발급 가능 (무료 티어 사용량 한도 내에서 과금 없음)
 - 로컬 개발 시: 프로젝트 루트에 `.env`(gitignore됨) 만들고 `GEMINI_API_KEY=...` 추가 후 `vercel dev`로 실행하거나, Vercel 배포 환경에서만 테스트
 - Vercel 배포 시: 프로젝트 Settings → Environment Variables에 `GEMINI_API_KEY` 추가 필수 (없으면 AI 해석 버튼이 "준비중입니다"를 반환함, 카드별 기본 해석은 키 없이도 정상 작동)
