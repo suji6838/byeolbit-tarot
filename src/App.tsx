@@ -12,6 +12,12 @@ export default function App() {
   const [member, setMember] = useState<Member | null>(null)
   const [loading, setLoading] = useState(true)
   const [showAuth, setShowAuth] = useState(false)
+  const [readingResetKey, setReadingResetKey] = useState(0)
+
+  const goHome = () => {
+    setTab('reading')
+    setReadingResetKey((k) => k + 1)
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -44,7 +50,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <button className="brand" onClick={() => setTab('reading')}>
+        <button className="brand" onClick={goHome}>
           <span>✦ 별빛마음상담소</span>
         </button>
         <button className="member-button" onClick={() => setShowAuth(true)}>
@@ -59,7 +65,7 @@ export default function App() {
         </button>
       </header>
 
-      {tab === 'reading' && <Reading loggedIn={!!member} onRequireAuth={() => setShowAuth(true)} />}
+      {tab === 'reading' && <Reading key={readingResetKey} loggedIn={!!member} onRequireAuth={() => setShowAuth(true)} />}
       {tab === 'history' && <History loggedIn={!!member} onRequireAuth={() => setShowAuth(true)} />}
 
       <nav className="tabbar">
