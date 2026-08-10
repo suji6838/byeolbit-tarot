@@ -180,6 +180,10 @@ export interface Spread {
   description: string
   positions: SpreadPosition[]
   questionPlaceholder: string
+  /** 'fan'이면 카드 더미를 연속 클릭하는 대신, 펼쳐진 카드 중 직접 골라 뽑아요. */
+  pickMode?: 'fan'
+  /** pickMode가 'fan'일 때 펼쳐 보여줄 카드 장수. */
+  fanSize?: number
 }
 
 export const SPREADS: Spread[] = [
@@ -215,13 +219,14 @@ export const SPREADS: Spread[] = [
   {
     id: 'choice',
     nameKo: '선택의 갈림길',
-    description: '두 갈래 길과 그 결과를 함께 비교해봐요.',
+    description: '펼쳐진 카드 중 2장을 직접 골라 두 갈래 길을 비교해봐요.',
     positions: [
       { label: '선택 A', hint: 'A를 선택했을 때' },
       { label: '선택 B', hint: 'B를 선택했을 때' },
-      { label: '조언', hint: '결정에 필요한 조언' },
     ],
     questionPlaceholder: '예: 지금 회사에 남을지, 이직할지 고민이에요.',
+    pickMode: 'fan',
+    fanSize: 9,
   },
 ]
 

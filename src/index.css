@@ -37,6 +37,11 @@ em{font-style:normal;color:var(--color-primary)}
 .deck-pile .deck-back:nth-child(2){transform:rotate(3deg) translateY(2px)}
 .deck-pile .deck-back:nth-child(3){transform:rotate(0)}
 .deck-hint{color:var(--color-muted);font-size:13px}
+.fan-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:420px}
+.fan-card{width:64px;height:96px;border-radius:10px;background:linear-gradient(135deg,#2a2458,#1c1a3d);border:2px solid var(--color-primary);display:grid;place-items:center;color:var(--color-primary);font-size:20px;cursor:pointer;transition:transform .15s}
+.fan-card:hover{transform:translateY(-4px)}
+.fan-card.disabled{opacity:.4;cursor:not-allowed}
+.fan-card.disabled:hover{transform:none}
 .card-row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:8px}
 .tarot-card{width:150px;background:var(--color-surface);border:1px solid var(--line);border-radius:16px;padding:16px 12px;text-align:center;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;animation:cardIn .5s ease both}
 @keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}

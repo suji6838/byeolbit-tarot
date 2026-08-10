@@ -21,15 +21,19 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
   const [question, setQuestion] = useState('')
   const [preparedDraw, setPreparedDraw] = useState<DrawnCard[] | null>(null)
   const [revealCount, setRevealCount] = useState(0)
+  const [fanPool, setFanPool] = useState<DrawnCard[] | null>(null)
+  const [pickedIndices, setPickedIndices] = useState<number[]>([])
   const [aiText, setAiText] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
   const [saved, setSaved] = useState(false)
 
-  const clearDraw = () => {
+  const clearDraw = (targetSpread: Spread | null) => {
     setQuestion('')
     setPreparedDraw(null)
     setRevealCount(0)
+    setPickedIndices([])
+    setFanPool(targetSpread?.pickMode === 'fan' ? drawCards(targetSpread.fanSize ?? 9) : null)
     setAiText(null)
     setAiError('')
     setSaved(false)
@@ -37,16 +41,16 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
 
   const chooseSpread = (s: Spread) => {
     setSpread(s)
-    clearDraw()
+    clearDraw(s)
   }
 
   const redraw = () => {
-    clearDraw()
+    clearDraw(spread)
   }
 
   const reset = () => {
     setSpread(null)
-    clearDraw()
+    clearDraw(null)
   }
 
   const saveBaseReading = async (activeSpread: Spread, queue: DrawnCard[]) => {
@@ -86,15 +90,30 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
     }
   }
 
+  const pickFanCard = (idx: number, currentDrawnLength: number) => {
+    if (!spread || !fanPool) return
+    if (currentDrawnLength === 0 && !question.trim()) return
+    if (pickedIndices.includes(idx)) return
+    if (pickedIndices.length >= spread.positions.length) return
+    const nextPicked = [...pickedIndices, idx]
+    setPickedIndices(nextPicked)
+    if (nextPicked.length === spread.positions.length) {
+      const queue = nextPicked.map((i) => fanPool[i])
+      void saveBaseReading(spread, queue)
+    }
+  }
+
   const askAi = async () => {
-    if (!spread || !preparedDraw) return
+    if (!spread) return
+    const cards = spread.pickMode === 'fan' ? (fanPool ? pickedIndices.map((i) => fanPool[i]) : []) : preparedDraw
+    if (!cards || cards.length === 0) return
     setAiLoading(true)
     setAiError('')
     try {
       const text = await fetchAiInterpretation({
         spreadName: spread.nameKo,
         question,
-        cards: preparedDraw.map((d, i) => ({
+        cards: cards.map((d, i) => ({
           position: spread.positions[i].label,
           cardId: d.card.id,
           cardName: d.card.nameKo,
@@ -133,8 +152,14 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
   }
 
   const total = spread.positions.length
-  const drawn = preparedDraw ? preparedDraw.slice(0, revealCount) : []
-  const allRevealed = revealCount === total && total > 0
+  const isFan = spread.pickMode === 'fan'
+  const drawn = isFan
+    ? pickedIndices.map((idx) => fanPool![idx])
+    : preparedDraw
+      ? preparedDraw.slice(0, revealCount)
+      : []
+  const allRevealed = drawn.length === total && total > 0
+  const questionRequired = drawn.length === 0 && !question.trim()
 
   return (
     <div className="view">
@@ -146,7 +171,7 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
         <p className="subcopy">{spread.description}</p>
       )}
 
-      {revealCount === 0 && (
+      {drawn.length === 0 && (
         <div className="question-box">
           <label htmlFor="question">궁금한 것을 적어주세요</label>
           <textarea
@@ -168,13 +193,13 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
         </div>
       )}
 
-      {!allRevealed && (
+      {!allRevealed && !isFan && (
         <div className="deck-stage">
           <div
-            className={`deck-pile${revealCount === 0 && !question.trim() ? ' disabled' : ''}`}
+            className={`deck-pile${questionRequired ? ' disabled' : ''}`}
             onClick={revealNext}
             role="button"
-            aria-disabled={revealCount === 0 && !question.trim()}
+            aria-disabled={questionRequired}
             aria-label="카드 뽑기"
           >
             <div className="deck-back">✦</div>
@@ -187,6 +212,32 @@ export default function Reading({ loggedIn, onRequireAuth }: { loggedIn: boolean
                 ? `카드 더미를 눌러 첫 번째 카드를 뽑아보세요. (${total}장 중 1번째: ${spread.positions[0].label})`
                 : '질문을 먼저 입력해 주세요.'
               : `카드 더미를 눌러 다음 카드를 뽑아보세요. (${revealCount}/${total}장, 다음: ${spread.positions[revealCount].label})`}
+          </p>
+        </div>
+      )}
+
+      {!allRevealed && isFan && (
+        <div className="deck-stage">
+          <div className="fan-grid">
+            {fanPool?.map((_, idx) =>
+              pickedIndices.includes(idx) ? null : (
+                <div
+                  key={idx}
+                  className={`fan-card${questionRequired ? ' disabled' : ''}`}
+                  onClick={() => pickFanCard(idx, drawn.length)}
+                  role="button"
+                  aria-disabled={questionRequired}
+                  aria-label="카드 선택"
+                >
+                  ✦
+                </div>
+              )
+            )}
+          </div>
+          <p className="deck-hint">
+            {questionRequired
+              ? '질문을 먼저 입력해 주세요.'
+              : `카드 중 하나를 골라 "${spread.positions[drawn.length].label}"로 확인해보세요.`}
           </p>
         </div>
       )}
