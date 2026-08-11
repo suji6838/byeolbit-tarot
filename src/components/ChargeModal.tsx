@@ -1,17 +1,12 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { COIN_PACKAGE, LITT_PRODUCT_URL } from '../config'
-import { ChargeRequest, listMyPendingChargeRequests, submitChargeRequest } from '../lib/charge'
+import { submitChargeRequest } from '../lib/charge'
 
-export default function ChargeModal({ onClose, onCharged }: { onClose: () => void; onCharged: () => void }) {
+export default function ChargeModal({ onClose, onCharged }: { onClose: () => void; onCharged: (coins: number) => void }) {
   const [referenceNote, setReferenceNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [pending, setPending] = useState<ChargeRequest[] | null>(null)
-
-  useEffect(() => {
-    listMyPendingChargeRequests().then(setPending)
-  }, [])
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
@@ -22,11 +17,10 @@ export default function ChargeModal({ onClose, onCharged }: { onClose: () => voi
     }
     setSubmitting(true)
     try {
-      await submitChargeRequest(referenceNote)
-      setNotice('충전 요청을 보냈어요. 확인 후 코인이 지급돼요.')
+      const newBalance = await submitChargeRequest(referenceNote, COIN_PACKAGE.coins, COIN_PACKAGE.amount)
+      setNotice(`코인 ${COIN_PACKAGE.coins}개가 충전됐어요! (현재 잔액 ${newBalance}개)`)
       setReferenceNote('')
-      setPending(await listMyPendingChargeRequests())
-      onCharged()
+      onCharged(newBalance)
     } catch (err) {
       setError(err instanceof Error ? err.message : '요청에 실패했어요.')
     } finally {
@@ -51,7 +45,7 @@ export default function ChargeModal({ onClose, onCharged }: { onClose: () => voi
         </div>
         <form onSubmit={submit} noValidate>
           <label>
-            2. 결제 후 입금자명 또는 주문번호를 입력해 주세요
+            2. 결제하셨다면 입금자명 또는 주문번호를 입력해 주세요
             <input
               value={referenceNote}
               onChange={(e) => setReferenceNote(e.target.value)}
@@ -62,26 +56,10 @@ export default function ChargeModal({ onClose, onCharged }: { onClose: () => voi
           {notice && <p className="auth-copy" role="status">{notice}</p>}
           {error && <p className="form-error" role="alert">{error}</p>}
           <button className="google-button" type="submit" disabled={submitting}>
-            {submitting ? '요청 중이에요' : '충전 요청하기'}
+            {submitting ? '확인하는 중이에요' : '결제 확인하고 코인 받기'}
           </button>
         </form>
-        <p className="auth-note">확인까지 시간이 걸릴 수 있어요. 요청 후 아래에서 대기 중인 요청을 확인할 수 있어요.</p>
-
-        {pending && pending.length > 0 && (
-          <div className="history-list" style={{ marginTop: 20 }}>
-            {pending.map((r) => (
-              <div className="history-card" key={r.id}>
-                <div className="history-date">
-                  {new Date(r.createdAt).toLocaleString('ko-KR')} · {r.coins}코인 · {r.amount.toLocaleString()}원
-                </div>
-                <div className="history-question">{r.referenceNote}</div>
-                <div className="history-cards">
-                  <span>확인 중</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <p className="auth-note">입력하신 정보는 실제 결제 여부를 나중에 확인하는 용도로 기록돼요. 결제 없이 임의로 입력하면 코인이 회수될 수 있어요.</p>
       </section>
     </div>
   )

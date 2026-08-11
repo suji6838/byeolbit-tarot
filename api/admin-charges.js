@@ -32,10 +32,10 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const { data: requests, error } = await admin
       .from('charge_requests')
-      .select('id, user_id, reference_note, coins, amount, status, created_at')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: true })
-    if (error) return res.status(500).json({ error: '요청 목록을 불러오지 못했어요.' })
+      .select('id, user_id, reference_note, coins, amount, revoked, created_at')
+      .order('created_at', { ascending: false })
+      .limit(50)
+    if (error) return res.status(500).json({ error: '목록을 불러오지 못했어요.' })
 
     const emailByUserId = {}
     for (const userId of [...new Set((requests ?? []).map((r) => r.user_id))]) {
@@ -51,6 +51,7 @@ export default async function handler(req, res) {
         referenceNote: r.reference_note,
         coins: r.coins,
         amount: r.amount,
+        revoked: r.revoked,
         createdAt: r.created_at,
       })),
     })
@@ -58,37 +59,29 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const { requestId, action } = req.body ?? {}
-    if (!requestId || !['approve', 'reject'].includes(action)) {
+    if (!requestId || action !== 'revoke') {
       return res.status(400).json({ error: '요청이 올바르지 않아요.' })
     }
 
     const { data: chargeRequest, error: fetchError } = await admin
       .from('charge_requests')
-      .select('id, user_id, coins, status')
+      .select('id, user_id, coins, revoked')
       .eq('id', requestId)
       .maybeSingle()
     if (fetchError || !chargeRequest) return res.status(404).json({ error: '요청을 찾을 수 없어요.' })
-    if (chargeRequest.status !== 'pending') return res.status(400).json({ error: '이미 처리된 요청이에요.' })
+    if (chargeRequest.revoked) return res.status(400).json({ error: '이미 회수된 요청이에요.' })
 
-    if (action === 'reject') {
-      await admin
-        .from('charge_requests')
-        .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
-        .eq('id', requestId)
-      return res.status(200).json({ ok: true })
-    }
-
-    const { error: creditError } = await admin.rpc('credit_coins', {
+    const { error: revokeError } = await admin.rpc('revoke_coins', {
       p_user_id: chargeRequest.user_id,
       p_coins: chargeRequest.coins,
     })
-    if (creditError) {
-      console.error('credit_coins failed:', creditError)
-      return res.status(500).json({ error: '코인 적립 중 오류가 발생했어요.' })
+    if (revokeError) {
+      console.error('revoke_coins failed:', revokeError)
+      return res.status(500).json({ error: '코인 회수 중 오류가 발생했어요.' })
     }
     await admin
       .from('charge_requests')
-      .update({ status: 'approved', reviewed_at: new Date().toISOString() })
+      .update({ revoked: true, revoked_at: new Date().toISOString() })
       .eq('id', requestId)
     return res.status(200).json({ ok: true })
   }

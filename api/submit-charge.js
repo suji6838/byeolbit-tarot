@@ -28,14 +28,26 @@ export default async function handler(req, res) {
   }
 
   const admin = createClient(SUPABASE_URL, serviceRoleKey)
+
+  // 결제 확인(리틀리 웹훅) 없이 즉시 충전하는 신뢰 기반 방식 — 대신 감사 기록을
+  // 남기고, 나중에 리틀리 판매내역과 대조해 이상하면 관리자가 revoke_coins로 회수한다.
   const { data: inserted, error: insertError } = await admin
     .from('charge_requests')
-    .insert({ user_id: user.id, reference_note: cleanNote, coins, amount })
+    .insert({ user_id: user.id, reference_note: cleanNote, coins, amount, status: 'approved', reviewed_at: new Date().toISOString() })
     .select('id, created_at')
     .single()
   if (insertError) {
     console.error('charge_requests insert failed:', insertError)
     return res.status(500).json({ error: '충전 요청 저장에 실패했어요.' })
+  }
+
+  const { data: newBalance, error: creditError } = await admin.rpc('credit_coins', {
+    p_user_id: user.id,
+    p_coins: coins,
+  })
+  if (creditError) {
+    console.error('credit_coins failed:', creditError)
+    return res.status(500).json({ error: '코인 적립 중 오류가 발생했어요.' })
   }
 
   const resendApiKey = process.env.RESEND_API_KEY
@@ -50,16 +62,16 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           from: '별빛마음상담소 <onboarding@resend.dev>',
           to: [ADMIN_EMAIL],
-          subject: `[충전 요청] ${cleanNote} · 코인 ${coins}개 · ${amount.toLocaleString()}원`,
+          subject: `[자동충전됨] ${cleanNote} · 코인 ${coins}개 · ${amount.toLocaleString()}원`,
           text: [
-            '새 코인 충전 요청이 도착했어요.',
+            '결제 확인 절차 없이 자동으로 코인이 충전됐어요. 리틀리 판매내역과 대조해 주세요.',
             '',
             `요청자 이메일: ${user.email}`,
             `입금자명/주문번호: ${cleanNote}`,
             `코인: ${coins}개 / 금액: ${amount.toLocaleString()}원`,
             `요청 시각: ${inserted.created_at}`,
             '',
-            '앱에서 로그인 후 우측 상단 🛠 아이콘을 눌러 승인해 주세요.',
+            '실제 결제 기록이 없으면 앱 우측 상단 🛠 아이콘에서 회수할 수 있어요.',
           ].join('\n'),
         }),
       })
@@ -68,5 +80,5 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.status(200).json({ ok: true, id: inserted.id })
+  return res.status(200).json({ ok: true, id: inserted.id, coins: newBalance })
 }

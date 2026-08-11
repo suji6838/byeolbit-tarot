@@ -127,7 +127,7 @@ export default function App() {
       )}
 
       {showCharge && (
-        <ChargeModal onClose={() => setShowCharge(false)} onCharged={refreshCoins} />
+        <ChargeModal onClose={() => setShowCharge(false)} onCharged={setCoins} />
       )}
 
       {showAdminCharges && <AdminCharges onClose={() => setShowAdminCharges(false)} />}
