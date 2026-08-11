@@ -12,7 +12,7 @@ export const ADMIN_EMAIL = 'joan6838@gmail.com'
 
 // Toss Payments 클라이언트 키 (공개 식별자, 비밀값 아님. 시크릿 키는 서버 환경변수로만 보관).
 // https://developers.tosspayments.com 개발자센터 > API 키 에서 확인.
-export const TOSS_CLIENT_KEY = 'REPLACE_WITH_TOSS_CLIENT_KEY'
+export const TOSS_CLIENT_KEY = 'test_ck_6bJXmgo28e9M2GjEnlME8LAnGKWx'
 
 // 코인 충전 상품: 10코인에 3,000원.
 export const COIN_PACKAGE = { coins: 10, amount: 3000 }
