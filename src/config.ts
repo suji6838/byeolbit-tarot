@@ -10,9 +10,9 @@ export const SUPABASE_ANON_KEY = 'sb_publishable_da6EdXLCv-r41kf_oRtNlw_3NMxWrU8
 // 관리자 계정 (UI 노출 여부만 결정, 실제 접근 제어는 서버에서 재검증).
 export const ADMIN_EMAIL = 'joan6838@gmail.com'
 
-// Toss Payments 클라이언트 키 (공개 식별자, 비밀값 아님. 시크릿 키는 서버 환경변수로만 보관).
-// https://developers.tosspayments.com 개발자센터 > API 키 에서 확인.
-export const TOSS_CLIENT_KEY = 'test_ck_6bJXmgo28e9M2GjEnlME8LAnGKWx'
-
 // 코인 충전 상품: 10코인에 3,000원.
 export const COIN_PACKAGE = { coins: 10, amount: 3000 }
+
+// 리틀리 판매 페이지 링크 (사업자등록 전이라 개인 판매자로 진행, 결제는 리틀리에서 하고
+// 앱에는 입금자명/주문번호만 입력받아 수동 승인함).
+export const LITT_PRODUCT_URL = 'https://litt.ly/REPLACE_WITH_LITT_PRODUCT_URL'

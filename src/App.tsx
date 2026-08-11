@@ -3,8 +3,10 @@ import { supabase } from './lib/supabase'
 import Reading from './components/Reading'
 import History from './components/History'
 import Auth from './components/Auth'
+import ChargeModal from './components/ChargeModal'
+import AdminCharges from './components/AdminCharges'
 import { getCoinBalance } from './lib/wallet'
-import { confirmPayment, requestCoinCharge } from './lib/toss'
+import { ADMIN_EMAIL } from './config'
 
 type Tab = 'reading' | 'history'
 type Member = { name: string; email: string; picture?: string }
@@ -14,9 +16,10 @@ export default function App() {
   const [member, setMember] = useState<Member | null>(null)
   const [loading, setLoading] = useState(true)
   const [showAuth, setShowAuth] = useState(false)
+  const [showCharge, setShowCharge] = useState(false)
+  const [showAdminCharges, setShowAdminCharges] = useState(false)
   const [readingResetKey, setReadingResetKey] = useState(0)
   const [coins, setCoins] = useState<number | null>(null)
-  const [toast, setToast] = useState('')
 
   const goHome = () => {
     setTab('reading')
@@ -43,40 +46,6 @@ export default function App() {
     })
   }, [])
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const paymentStatus = params.get('payment')
-    if (!paymentStatus) return
-
-    const cleanUrl = () => {
-      const url = new URL(window.location.href)
-      url.search = ''
-      window.history.replaceState({}, '', url.toString())
-    }
-
-    if (paymentStatus === 'success') {
-      const paymentKey = params.get('paymentKey')
-      const orderId = params.get('orderId')
-      const amount = Number(params.get('amount'))
-      if (paymentKey && orderId && amount) {
-        confirmPayment({ paymentKey, orderId, amount })
-          .then(async (newBalance) => {
-            setCoins(newBalance)
-            setToast('코인 충전이 완료됐어요!')
-          })
-          .catch((err) => {
-            setToast(err instanceof Error ? err.message : '결제 확인에 실패했어요.')
-          })
-          .finally(cleanUrl)
-      } else {
-        cleanUrl()
-      }
-    } else if (paymentStatus === 'fail') {
-      setToast('결제가 취소되었거나 실패했어요.')
-      cleanUrl()
-    }
-  }, [])
-
   const completeAuth = async (nextMember: Member) => {
     setMember(nextMember)
     await refreshCoins()
@@ -89,16 +58,12 @@ export default function App() {
     setTab('reading')
   }
 
-  const chargeCoins = async () => {
+  const chargeCoins = () => {
     if (!member) {
       setShowAuth(true)
       return
     }
-    try {
-      await requestCoinCharge()
-    } catch (err) {
-      setToast(err instanceof Error ? err.message : '결제 요청에 실패했어요.')
-    }
+    setShowCharge(true)
   }
 
   if (loading) {
@@ -112,6 +77,11 @@ export default function App() {
           <span>✦ 별빛마음상담소</span>
         </button>
         <div className="header-actions">
+          {member?.email === ADMIN_EMAIL && (
+            <button className="member-button" onClick={() => setShowAdminCharges(true)} title="충전 요청 승인">
+              <span>🛠</span>
+            </button>
+          )}
           {member && (
             <button className="member-button" onClick={chargeCoins} title="코인 충전하기">
               <span>🪙 {coins ?? 0}</span>
@@ -156,12 +126,11 @@ export default function App() {
         />
       )}
 
-      {toast && (
-        <div className="toast">
-          {toast}
-          <button onClick={() => setToast('')} aria-label="닫기">×</button>
-        </div>
+      {showCharge && (
+        <ChargeModal onClose={() => setShowCharge(false)} onCharged={refreshCoins} />
       )}
+
+      {showAdminCharges && <AdminCharges onClose={() => setShowAdminCharges(false)} />}
     </div>
   )
 }
