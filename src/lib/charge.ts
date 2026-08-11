@@ -12,16 +12,25 @@ export interface ChargeRequest {
 
 export async function submitChargeRequest(referenceNote: string): Promise<void> {
   const { data: sessionData } = await supabase.auth.getSession()
-  const userId = sessionData.session?.user.id
-  if (!userId) throw new Error('로그인이 필요해요.')
+  const accessToken = sessionData.session?.access_token
+  if (!accessToken) throw new Error('로그인이 필요해요.')
 
-  const { error } = await supabase.from('charge_requests').insert({
-    user_id: userId,
-    reference_note: referenceNote.trim().slice(0, 100),
-    coins: COIN_PACKAGE.coins,
-    amount: COIN_PACKAGE.amount,
+  const res = await fetch('/api/submit-charge', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      referenceNote,
+      coins: COIN_PACKAGE.coins,
+      amount: COIN_PACKAGE.amount,
+    }),
   })
-  if (error) throw new Error('충전 요청에 실패했어요. 잠시 후 다시 시도해 주세요.')
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error || '충전 요청에 실패했어요. 잠시 후 다시 시도해 주세요.')
+  }
 }
 
 export async function listMyChargeRequests(): Promise<ChargeRequest[]> {
