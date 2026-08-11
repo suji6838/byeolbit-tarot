@@ -3,6 +3,7 @@ import { COIN_PACKAGE, LITT_PRODUCT_URL } from '../config'
 import { submitChargeRequest } from '../lib/charge'
 
 export default function ChargeModal({ onClose, onCharged }: { onClose: () => void; onCharged: (coins: number) => void }) {
+  const [visitedPaymentPage, setVisitedPaymentPage] = useState(false)
   const [referenceNote, setReferenceNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -11,6 +12,10 @@ export default function ChargeModal({ onClose, onCharged }: { onClose: () => voi
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setError('')
+    if (!visitedPaymentPage) {
+      setError('먼저 결제 페이지로 이동해서 결제를 진행해 주세요.')
+      return
+    }
     if (!referenceNote.trim()) {
       setError('입금자명 또는 주문번호를 입력해 주세요.')
       return
@@ -39,7 +44,14 @@ export default function ChargeModal({ onClose, onCharged }: { onClose: () => voi
         </p>
         <div className="consent-box">
           <p className="consent-title">1. 결제 페이지로 이동해서 결제해 주세요</p>
-          <a className="google-button" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }} href={LITT_PRODUCT_URL} target="_blank" rel="noreferrer">
+          <a
+            className="google-button"
+            style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
+            href={LITT_PRODUCT_URL}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => setVisitedPaymentPage(true)}
+          >
             결제 페이지 열기 (새 탭)
           </a>
         </div>
@@ -51,11 +63,13 @@ export default function ChargeModal({ onClose, onCharged }: { onClose: () => voi
               onChange={(e) => setReferenceNote(e.target.value)}
               placeholder="예: 홍길동 또는 주문번호"
               maxLength={100}
+              disabled={!visitedPaymentPage}
             />
           </label>
+          {!visitedPaymentPage && <p className="hint">1번 결제 페이지를 먼저 열어야 입력할 수 있어요.</p>}
           {notice && <p className="auth-copy" role="status">{notice}</p>}
           {error && <p className="form-error" role="alert">{error}</p>}
-          <button className="google-button" type="submit" disabled={submitting}>
+          <button className="google-button" type="submit" disabled={submitting || !visitedPaymentPage}>
             {submitting ? '확인하는 중이에요' : '결제 확인하고 코인 받기'}
           </button>
         </form>
