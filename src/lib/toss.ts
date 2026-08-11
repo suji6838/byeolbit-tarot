@@ -22,7 +22,7 @@ function loadTossScript(): Promise<void> {
     }
     const script = document.createElement('script')
     script.id = 'toss-payments-script'
-    script.src = 'https://js.tosspayments.com/v2'
+    script.src = 'https://js.tosspayments.com/v2/standard'
     script.async = true
     script.onload = () => resolve()
     script.onerror = () => reject(new Error('Toss SDK 로드 실패'))
