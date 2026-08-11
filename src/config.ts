@@ -15,4 +15,4 @@ export const COIN_PACKAGE = { coins: 10, amount: 3000 }
 
 // 리틀리 판매 페이지 링크 (사업자등록 전이라 개인 판매자로 진행, 결제는 리틀리에서 하고
 // 앱에는 입금자명/주문번호만 입력받아 수동 승인함).
-export const LITT_PRODUCT_URL = 'https://litt.ly/REPLACE_WITH_LITT_PRODUCT_URL'
+export const LITT_PRODUCT_URL = 'https://litt.ly/byeolbittarot'
