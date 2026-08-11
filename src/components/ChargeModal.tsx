@@ -1,22 +1,16 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { COIN_PACKAGE, LITT_PRODUCT_URL } from '../config'
-import { ChargeRequest, listMyChargeRequests, submitChargeRequest } from '../lib/charge'
-
-const STATUS_LABEL: Record<ChargeRequest['status'], string> = {
-  pending: '확인 중',
-  approved: '충전 완료',
-  rejected: '반려됨',
-}
+import { ChargeRequest, listMyPendingChargeRequests, submitChargeRequest } from '../lib/charge'
 
 export default function ChargeModal({ onClose, onCharged }: { onClose: () => void; onCharged: () => void }) {
   const [referenceNote, setReferenceNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [history, setHistory] = useState<ChargeRequest[] | null>(null)
+  const [pending, setPending] = useState<ChargeRequest[] | null>(null)
 
   useEffect(() => {
-    listMyChargeRequests().then(setHistory)
+    listMyPendingChargeRequests().then(setPending)
   }, [])
 
   const submit = async (event: FormEvent) => {
@@ -31,7 +25,7 @@ export default function ChargeModal({ onClose, onCharged }: { onClose: () => voi
       await submitChargeRequest(referenceNote)
       setNotice('충전 요청을 보냈어요. 확인 후 코인이 지급돼요.')
       setReferenceNote('')
-      setHistory(await listMyChargeRequests())
+      setPending(await listMyPendingChargeRequests())
       onCharged()
     } catch (err) {
       setError(err instanceof Error ? err.message : '요청에 실패했어요.')
@@ -71,18 +65,18 @@ export default function ChargeModal({ onClose, onCharged }: { onClose: () => voi
             {submitting ? '요청 중이에요' : '충전 요청하기'}
           </button>
         </form>
-        <p className="auth-note">확인까지 시간이 걸릴 수 있어요. 요청 후 아래에서 진행 상태를 확인할 수 있어요.</p>
+        <p className="auth-note">확인까지 시간이 걸릴 수 있어요. 요청 후 아래에서 대기 중인 요청을 확인할 수 있어요.</p>
 
-        {history && history.length > 0 && (
+        {pending && pending.length > 0 && (
           <div className="history-list" style={{ marginTop: 20 }}>
-            {history.map((r) => (
+            {pending.map((r) => (
               <div className="history-card" key={r.id}>
                 <div className="history-date">
                   {new Date(r.createdAt).toLocaleString('ko-KR')} · {r.coins}코인 · {r.amount.toLocaleString()}원
                 </div>
                 <div className="history-question">{r.referenceNote}</div>
                 <div className="history-cards">
-                  <span>{STATUS_LABEL[r.status]}</span>
+                  <span>확인 중</span>
                 </div>
               </div>
             ))}

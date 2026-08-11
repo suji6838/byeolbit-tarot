@@ -6,7 +6,6 @@ export interface ChargeRequest {
   referenceNote: string
   coins: number
   amount: number
-  status: 'pending' | 'approved' | 'rejected'
   createdAt: string
 }
 
@@ -33,15 +32,16 @@ export async function submitChargeRequest(referenceNote: string): Promise<void> 
   }
 }
 
-export async function listMyChargeRequests(): Promise<ChargeRequest[]> {
+export async function listMyPendingChargeRequests(): Promise<ChargeRequest[]> {
   const { data: sessionData } = await supabase.auth.getSession()
   const userId = sessionData.session?.user.id
   if (!userId) return []
 
   const { data, error } = await supabase
     .from('charge_requests')
-    .select('id, reference_note, coins, amount, status, created_at')
+    .select('id, reference_note, coins, amount, created_at')
     .eq('user_id', userId)
+    .eq('status', 'pending')
     .order('created_at', { ascending: false })
     .limit(20)
   if (error) return []
@@ -50,7 +50,6 @@ export async function listMyChargeRequests(): Promise<ChargeRequest[]> {
     referenceNote: r.reference_note,
     coins: r.coins,
     amount: r.amount,
-    status: r.status,
     createdAt: r.created_at,
   }))
 }
