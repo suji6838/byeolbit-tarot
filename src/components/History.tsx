@@ -59,6 +59,13 @@ export default function History() {
                 </span>
               ))}
             </div>
+            <p className="history-interpretation">{r.baseInterpretation}</p>
+            {r.aiInterpretation && (
+              <div className="history-ai">
+                <span className="eyebrow">별빛 상담사의 한마디</span>
+                <p>{r.aiInterpretation}</p>
+              </div>
+            )}
           </div>
         ))}
       </div>

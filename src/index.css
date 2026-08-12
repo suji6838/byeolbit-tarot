@@ -73,6 +73,9 @@ em{font-style:normal;color:var(--color-primary)}
 .history-card .history-date{font-size:11px;color:var(--color-muted);margin-bottom:6px}
 .history-card .history-question{font-size:14px;font-weight:700;margin-bottom:8px}
 .history-card .history-cards{display:flex;gap:6px;flex-wrap:wrap;font-size:11px;color:var(--color-primary)}
+.history-interpretation{margin:10px 0 0;font-size:12px;line-height:1.65;color:var(--color-text);white-space:pre-wrap}
+.history-ai{margin-top:10px;background:var(--color-accent);border-radius:12px;padding:12px}
+.history-ai p{margin:6px 0 0;font-size:12px;line-height:1.65;color:var(--color-text);white-space:pre-wrap}
 .empty-view{text-align:center;padding-top:90px;min-height:60vh}
 .empty-orb{height:74px;width:74px;display:grid;place-items:center;margin:0 auto 22px;border-radius:50%;background:var(--color-accent);color:var(--color-primary);font-size:32px}
 .empty-view h1{font-size:24px;margin-bottom:12px}

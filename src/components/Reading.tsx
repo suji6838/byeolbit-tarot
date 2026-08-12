@@ -2,7 +2,7 @@ import { KeyboardEvent, useState } from 'react'
 import { SPREADS, Spread, TarotCard, drawCards } from '../data'
 import TarotCardView from './TarotCardView'
 import { InsufficientCoinsError, fetchAiInterpretation } from '../lib/interpret'
-import { Reading as ReadingRecord, saveReading } from '../lib/readings'
+import { Reading as ReadingRecord, saveReading, updateReadingAiInterpretation } from '../lib/readings'
 
 type DrawnCard = { card: TarotCard; reversed: boolean }
 
@@ -45,6 +45,7 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCo
   const [aiError, setAiError] = useState('')
   const [insufficientCoins, setInsufficientCoins] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [currentReadingId, setCurrentReadingId] = useState<string | null>(null)
 
   const clearDraw = (targetSpread: Spread | null) => {
     setQuestion('')
@@ -57,6 +58,7 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCo
     setAiError('')
     setInsufficientCoins(false)
     setSaved(false)
+    setCurrentReadingId(null)
   }
 
   const chooseSpread = (s: Spread) => {
@@ -89,6 +91,7 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCo
       baseInterpretation: buildBaseInterpretation(activeSpread, queue),
       aiInterpretation: null,
     }
+    setCurrentReadingId(record.id)
     try {
       await saveReading(record)
       setSaved(true)
@@ -149,6 +152,9 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCo
       setAiText(result.interpretation)
       setAiMethod(result.method)
       if (result.remainingCoins != null) onCoinsChange(result.remainingCoins)
+      if (currentReadingId) {
+        void updateReadingAiInterpretation(currentReadingId, result.interpretation).catch(() => {})
+      }
     } catch (err) {
       if (err instanceof InsufficientCoinsError) {
         setInsufficientCoins(true)
