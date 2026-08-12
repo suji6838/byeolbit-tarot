@@ -6,6 +6,7 @@ import Auth from './components/Auth'
 import ChargeModal from './components/ChargeModal'
 import AdminCharges from './components/AdminCharges'
 import ResetPassword from './components/ResetPassword'
+import LegalModal from './components/LegalModal'
 import { getCoinBalance } from './lib/wallet'
 import { ADMIN_EMAIL } from './config'
 
@@ -22,6 +23,7 @@ export default function App() {
   const [readingResetKey, setReadingResetKey] = useState(0)
   const [coins, setCoins] = useState<number | null>(null)
   const [showResetPassword, setShowResetPassword] = useState(false)
+  const [legalView, setLegalView] = useState<'terms' | 'privacy' | null>(null)
 
   const goHome = () => {
     setTab('reading')
@@ -134,6 +136,12 @@ export default function App() {
       )}
       {tab === 'history' && member && <History />}
 
+      <footer className="site-footer legal-footer-links">
+        <button type="button" onClick={() => setLegalView('terms')}>이용약관</button><span>·</span>
+        <button type="button" onClick={() => setLegalView('privacy')}>개인정보처리방침</button><span>·</span>
+        <a href={`mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent('별빛마음상담소 문의')}`}>문의하기</a>
+      </footer>
+
       <nav className="tabbar">
         <button className={tab === 'reading' ? 'active' : ''} onClick={() => setTab('reading')}>
           <span>🔮</span>상담
@@ -169,6 +177,8 @@ export default function App() {
           }}
         />
       )}
+
+      {legalView && <LegalModal doc={legalView} onClose={() => setLegalView(null)} />}
     </div>
   )
 }
