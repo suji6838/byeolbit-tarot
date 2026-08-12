@@ -10,8 +10,8 @@ export const SUPABASE_ANON_KEY = 'sb_publishable_da6EdXLCv-r41kf_oRtNlw_3NMxWrU8
 // 관리자 계정 (UI 노출 여부만 결정, 실제 접근 제어는 서버에서 재검증).
 export const ADMIN_EMAIL = 'joan6838@gmail.com'
 
-// 코인 충전 상품: 10코인에 3,000원.
-export const COIN_PACKAGE = { coins: 10, amount: 3000 }
+// 코인 충전 상품: 10코인에 2,900원.
+export const COIN_PACKAGE = { coins: 10, amount: 2900 }
 
 // 리틀리 판매 페이지 링크 (사업자등록 전이라 개인 판매자로 진행, 결제는 리틀리에서 하고
 // 앱에는 입금자명/주문번호만 입력받아 수동 승인함).

@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-export async function submitChargeRequest(referenceNote: string, coins: number, amount: number): Promise<number> {
+export async function submitChargeRequest(referenceNote: string): Promise<void> {
   const { data: sessionData } = await supabase.auth.getSession()
   const accessToken = sessionData.session?.access_token
   if (!accessToken) throw new Error('로그인이 필요해요.')
@@ -11,9 +11,8 @@ export async function submitChargeRequest(referenceNote: string, coins: number, 
       'Content-Type': 'application/json',
       Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify({ referenceNote, coins, amount }),
+    body: JSON.stringify({ referenceNote }),
   })
   const body = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(body.error || '충전 요청에 실패했어요. 잠시 후 다시 시도해 주세요.')
-  return body.coins as number
 }

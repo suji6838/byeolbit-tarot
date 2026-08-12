@@ -5,6 +5,7 @@ import History from './components/History'
 import Auth from './components/Auth'
 import ChargeModal from './components/ChargeModal'
 import AdminCharges from './components/AdminCharges'
+import ResetPassword from './components/ResetPassword'
 import { getCoinBalance } from './lib/wallet'
 import { ADMIN_EMAIL } from './config'
 
@@ -20,6 +21,7 @@ export default function App() {
   const [showAdminCharges, setShowAdminCharges] = useState(false)
   const [readingResetKey, setReadingResetKey] = useState(0)
   const [coins, setCoins] = useState<number | null>(null)
+  const [showResetPassword, setShowResetPassword] = useState(false)
 
   const goHome = () => {
     setTab('reading')
@@ -44,6 +46,10 @@ export default function App() {
       }
       setLoading(false)
     })
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') setShowResetPassword(true)
+    })
+    return () => sub.subscription.unsubscribe()
   }, [])
 
   const completeAuth = async (nextMember: Member) => {
@@ -66,8 +72,25 @@ export default function App() {
     setShowCharge(true)
   }
 
+  const closeCharge = () => {
+    setShowCharge(false)
+    void refreshCoins()
+  }
+
   if (loading) {
-    return <div className="loading-view">별빛을 불러오는 중이에요...</div>
+    return (
+      <>
+        <div className="loading-view">별빛을 불러오는 중이에요...</div>
+        {showResetPassword && (
+          <ResetPassword
+            onDone={async () => {
+              setShowResetPassword(false)
+              await refreshCoins()
+            }}
+          />
+        )}
+      </>
+    )
   }
 
   return (
@@ -126,11 +149,18 @@ export default function App() {
         />
       )}
 
-      {showCharge && (
-        <ChargeModal onClose={() => setShowCharge(false)} onCharged={setCoins} />
-      )}
+      {showCharge && <ChargeModal onClose={closeCharge} />}
 
       {showAdminCharges && <AdminCharges onClose={() => setShowAdminCharges(false)} />}
+
+      {showResetPassword && (
+        <ResetPassword
+          onDone={async () => {
+            setShowResetPassword(false)
+            await refreshCoins()
+          }}
+        />
+      )}
     </div>
   )
 }
