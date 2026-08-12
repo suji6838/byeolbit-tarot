@@ -104,6 +104,7 @@ em{font-style:normal;color:var(--color-primary)}
 .legal-footer-links button,.legal-footer-links a{background:transparent;border:0;color:var(--color-muted);font-size:10px;text-decoration:underline;cursor:pointer}
 .legal-footer-links span{color:var(--color-muted);margin:0 6px;opacity:.5}
 .site-footer{padding:26px 20px 8px;text-align:center}
+.legal-footer-links .contact-email{color:var(--color-primary);font-size:10px;user-select:all}
 .legal-modal .legal-content{margin-top:16px;max-height:52vh;overflow-y:auto;padding-right:4px}
 .legal-content article{margin-bottom:18px}
 .legal-content h2{font-size:13px;color:var(--color-primary);margin:0 0 8px}

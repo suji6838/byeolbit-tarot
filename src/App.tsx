@@ -8,7 +8,7 @@ import AdminCharges from './components/AdminCharges'
 import ResetPassword from './components/ResetPassword'
 import LegalModal from './components/LegalModal'
 import { getCoinBalance } from './lib/wallet'
-import { ADMIN_EMAIL } from './config'
+import { ADMIN_EMAIL, CONTACT_EMAIL } from './config'
 
 type Tab = 'reading' | 'history'
 type Member = { name: string; email: string; picture?: string }
@@ -24,6 +24,7 @@ export default function App() {
   const [coins, setCoins] = useState<number | null>(null)
   const [showResetPassword, setShowResetPassword] = useState(false)
   const [legalView, setLegalView] = useState<'terms' | 'privacy' | null>(null)
+  const [contactRevealed, setContactRevealed] = useState(false)
 
   const goHome = () => {
     setTab('reading')
@@ -139,7 +140,11 @@ export default function App() {
       <footer className="site-footer legal-footer-links">
         <button type="button" onClick={() => setLegalView('terms')}>이용약관</button><span>·</span>
         <button type="button" onClick={() => setLegalView('privacy')}>개인정보처리방침</button><span>·</span>
-        <a href={`mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent('별빛마음상담소 문의')}`}>문의하기</a>
+        {contactRevealed ? (
+          <span className="contact-email">{CONTACT_EMAIL}</span>
+        ) : (
+          <button type="button" onClick={() => setContactRevealed(true)}>문의하기</button>
+        )}
       </footer>
 
       <nav className="tabbar">
