@@ -292,7 +292,7 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCo
               </div>
             ))}
             <div className="ai-box">
-              <span className="eyebrow">AI 상담사의 한마디</span>
+              <span className="eyebrow">별빛 상담사의 한마디</span>
               {aiText && (
                 <>
                   <p>{aiText}</p>
@@ -303,7 +303,7 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCo
               )}
               {!aiText && !aiLoading && !aiError && (
                 <button className="secondary-button" onClick={askAi}>
-                  {loggedIn ? 'AI 상담사에게 더 물어보기' : '로그인하고 AI 상담 받기'}
+                  {loggedIn ? '별빛 상담사에게 더 물어보기' : '로그인하고 별빛 상담 받기'}
                 </button>
               )}
               {aiLoading && <p className="loading">별빛 상담사가 카드를 살펴보며 질문에 대한 답을 찾고 있어요...</p>}
