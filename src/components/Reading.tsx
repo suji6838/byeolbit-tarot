@@ -29,9 +29,10 @@ type Props = {
   loggedIn: boolean
   onRequireAuth: () => void
   onRequireCharge: () => void
+  onCoinsChange: (coins: number) => void
 }
 
-export default function Reading({ loggedIn, onRequireAuth, onRequireCharge }: Props) {
+export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCoinsChange }: Props) {
   const [spread, setSpread] = useState<Spread | null>(null)
   const [question, setQuestion] = useState('')
   const [preparedDraw, setPreparedDraw] = useState<DrawnCard[] | null>(null)
@@ -147,6 +148,7 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge }: Pr
       })
       setAiText(result.interpretation)
       setAiMethod(result.method)
+      if (result.remainingCoins != null) onCoinsChange(result.remainingCoins)
     } catch (err) {
       if (err instanceof InsufficientCoinsError) {
         setInsufficientCoins(true)

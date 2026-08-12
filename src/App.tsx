@@ -124,7 +124,13 @@ export default function App() {
       </header>
 
       {tab === 'reading' && (
-        <Reading key={readingResetKey} loggedIn={!!member} onRequireAuth={() => setShowAuth(true)} onRequireCharge={chargeCoins} />
+        <Reading
+          key={readingResetKey}
+          loggedIn={!!member}
+          onRequireAuth={() => setShowAuth(true)}
+          onRequireCharge={chargeCoins}
+          onCoinsChange={setCoins}
+        />
       )}
       {tab === 'history' && member && <History />}
 
