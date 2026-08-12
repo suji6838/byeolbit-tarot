@@ -85,7 +85,8 @@ export async function saveReading(reading: Reading): Promise<void> {
 export async function updateReadingAiInterpretation(id: string, aiInterpretation: string): Promise<void> {
   const userId = await getUserId()
   if (userId) {
-    await supabase.from('readings').update({ ai_interpretation: aiInterpretation }).eq('id', id)
+    const { error } = await supabase.from('readings').update({ ai_interpretation: aiInterpretation }).eq('id', id)
+    if (error) throw error
   } else {
     const local = readLocal()
     const idx = local.findIndex((r) => r.id === id)

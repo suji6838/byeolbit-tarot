@@ -153,7 +153,9 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCo
       setAiMethod(result.method)
       if (result.remainingCoins != null) onCoinsChange(result.remainingCoins)
       if (currentReadingId) {
-        void updateReadingAiInterpretation(currentReadingId, result.interpretation).catch(() => {})
+        void updateReadingAiInterpretation(currentReadingId, result.interpretation).catch((err) => {
+          console.error('AI 해석을 기록에 저장하지 못했어요:', err)
+        })
       }
     } catch (err) {
       if (err instanceof InsufficientCoinsError) {
