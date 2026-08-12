@@ -25,6 +25,7 @@ export default function App() {
   const [showResetPassword, setShowResetPassword] = useState(false)
   const [legalView, setLegalView] = useState<'terms' | 'privacy' | null>(null)
   const [contactRevealed, setContactRevealed] = useState(false)
+  const [showWithdrawnToast, setShowWithdrawnToast] = useState(false)
 
   const goHome = () => {
     setTab('reading')
@@ -54,6 +55,12 @@ export default function App() {
     })
     return () => sub.subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    if (!showWithdrawnToast) return
+    const timer = setTimeout(() => setShowWithdrawnToast(false), 6000)
+    return () => clearTimeout(timer)
+  }, [showWithdrawnToast])
 
   const completeAuth = async (nextMember: Member) => {
     setMember(nextMember)
@@ -165,6 +172,7 @@ export default function App() {
           onComplete={completeAuth}
           member={member}
           onLogout={logout}
+          onAccountDeleted={() => setShowWithdrawnToast(true)}
         />
       )}
 
@@ -184,6 +192,13 @@ export default function App() {
       )}
 
       {legalView && <LegalModal doc={legalView} onClose={() => setLegalView(null)} />}
+
+      {showWithdrawnToast && (
+        <div className="toast" role="status">
+          탈퇴가 완료됐어요. 그동안 이용해 주셔서 감사해요.
+          <button type="button" onClick={() => setShowWithdrawnToast(false)} aria-label="닫기">×</button>
+        </div>
+      )}
     </div>
   )
 }

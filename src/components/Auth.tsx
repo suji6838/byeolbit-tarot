@@ -13,6 +13,7 @@ type Props = {
   onComplete: (member: Member) => Promise<void>
   member: Member | null
   onLogout: () => Promise<void>
+  onAccountDeleted: () => void
 }
 
 declare global {
@@ -39,7 +40,7 @@ function friendlyAuthError(err: unknown): string {
   return '처리하지 못했어요. 잠시 후 다시 시도해 주세요.'
 }
 
-export default function Auth({ onClose, onComplete, member, onLogout }: Props) {
+export default function Auth({ onClose, onComplete, member, onLogout, onAccountDeleted }: Props) {
   useEscapeKey(onClose)
   const buttonRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState('')
@@ -127,6 +128,7 @@ export default function Auth({ onClose, onComplete, member, onLogout }: Props) {
         window.google?.accounts?.id?.disableAutoSelect()
         await onLogout()
         onClose()
+        onAccountDeleted()
       } catch (err) {
         setError(err instanceof Error ? err.message : '탈퇴 처리에 실패했어요.')
       } finally {
