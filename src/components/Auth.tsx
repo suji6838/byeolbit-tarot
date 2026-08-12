@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { GOOGLE_CLIENT_ID } from '../config'
 import { supabase } from '../lib/supabase'
+import { useEscapeKey } from '../lib/useEscapeKey'
 import LegalModal from './LegalModal'
 
 const CONSENT_KEY = 'byeolbit:agreed'
@@ -38,11 +39,12 @@ function friendlyAuthError(err: unknown): string {
 }
 
 export default function Auth({ onClose, onComplete, member, onLogout }: Props) {
+  useEscapeKey(onClose)
   const buttonRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -134,6 +136,26 @@ export default function Auth({ onClose, onComplete, member, onLogout }: Props) {
     )
   }
 
+  const submitForgot = async (event: FormEvent) => {
+    event.preventDefault()
+    setError('')
+    setNotice('')
+    const cleanEmail = email.trim()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) return setError('올바른 이메일 주소를 입력해 주세요.')
+    setSubmitting(true)
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+        redirectTo: window.location.origin,
+      })
+      if (resetError) throw resetError
+      setNotice('비밀번호 재설정 링크를 이메일로 보냈어요. 메일함을 확인해 주세요.')
+    } catch (err) {
+      setError(friendlyAuthError(err))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const submitEmail = async (event: FormEvent) => {
     event.preventDefault()
     setError('')
@@ -201,22 +223,51 @@ export default function Auth({ onClose, onComplete, member, onLogout }: Props) {
             </label>
           </div>
         )}
-        {readyForAuth ? <div ref={buttonRef} className="google-signin-slot" /> : <p className="consent-note">약관에 모두 동의하면 구글로 계속하기를 이용할 수 있어요.</p>}
-        <div className="auth-divider"><span>또는 이메일로 {mode === 'signup' ? '가입' : '로그인'}</span></div>
-        <form onSubmit={submitEmail} noValidate>
-          {mode === 'signup' && (
-            <label>이름<input value={name} onChange={(e) => setName(e.target.value)} placeholder="이름을 입력해 주세요" autoComplete="name" /></label>
-          )}
-          <label>이메일<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" type="email" autoComplete="email" /></label>
-          <label>비밀번호<input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="6자 이상" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} /></label>
-          {notice && <p className="auth-copy" role="status">{notice}</p>}
-          {error && <p className="form-error" role="alert">{error}</p>}
-          <button className="google-button" type="submit" disabled={submitting || !readyForAuth}>
-            {submitting ? '처리하고 있어요' : mode === 'signup' ? '이메일로 회원가입' : '이메일로 로그인'}
-          </button>
-        </form>
-        <button type="button" className="text-button" onClick={() => { setMode(mode === 'signup' ? 'signin' : 'signup'); setError(''); setNotice('') }}>
-          {mode === 'signup' ? '이미 계정이 있으신가요? 로그인' : '계정이 없으신가요? 이메일로 가입하기'}
+        {mode !== 'forgot' && (
+          <>
+            {readyForAuth ? <div ref={buttonRef} className="google-signin-slot" /> : <p className="consent-note">약관에 모두 동의하면 구글로 계속하기를 이용할 수 있어요.</p>}
+            <div className="auth-divider"><span>또는 이메일로 {mode === 'signup' ? '가입' : '로그인'}</span></div>
+          </>
+        )}
+        {mode === 'forgot' ? (
+          <form onSubmit={submitForgot} noValidate>
+            <label>이메일<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" type="email" autoComplete="email" /></label>
+            {notice && <p className="auth-copy" role="status">{notice}</p>}
+            {error && <p className="form-error" role="alert">{error}</p>}
+            <button className="google-button" type="submit" disabled={submitting}>
+              {submitting ? '보내는 중이에요' : '재설정 링크 보내기'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={submitEmail} noValidate>
+            {mode === 'signup' && (
+              <label>이름<input value={name} onChange={(e) => setName(e.target.value)} placeholder="이름을 입력해 주세요" autoComplete="name" /></label>
+            )}
+            <label>이메일<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" type="email" autoComplete="email" /></label>
+            <label>비밀번호<input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="6자 이상" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} /></label>
+            {mode === 'signin' && (
+              <button
+                type="button"
+                className="text-button"
+                style={{ justifySelf: 'start' }}
+                onClick={() => { setMode('forgot'); setError(''); setNotice('') }}
+              >
+                비밀번호를 잊으셨나요?
+              </button>
+            )}
+            {notice && <p className="auth-copy" role="status">{notice}</p>}
+            {error && <p className="form-error" role="alert">{error}</p>}
+            <button className="google-button" type="submit" disabled={submitting || !readyForAuth}>
+              {submitting ? '처리하고 있어요' : mode === 'signup' ? '이메일로 회원가입' : '이메일로 로그인'}
+            </button>
+          </form>
+        )}
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => { setMode(mode === 'signup' ? 'signin' : mode === 'forgot' ? 'signin' : 'signup'); setError(''); setNotice('') }}
+        >
+          {mode === 'signup' ? '이미 계정이 있으신가요? 로그인' : mode === 'forgot' ? '로그인으로 돌아가기' : '계정이 없으신가요? 이메일로 가입하기'}
         </button>
         <p className="auth-note">로그인하면 상담 기록이 안전하게 저장되어, 다른 기기에서도 이어서 확인할 수 있어요.</p>
         <p className="legal-footer-links">

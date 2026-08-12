@@ -8,15 +8,29 @@ function formatDate(iso: string): string {
 
 export default function History() {
   const [readings, setReadings] = useState<Reading[] | null>(null)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     listReadings()
       .then(setReadings)
-      .catch(() => setReadings([]))
+      .catch(() => {
+        setLoadError(true)
+        setReadings([])
+      })
   }, [])
 
   if (readings === null) {
     return <div className="loading-view">불러오는 중이에요...</div>
+  }
+
+  if (loadError) {
+    return (
+      <div className="empty-view">
+        <div className="empty-orb">⚠️</div>
+        <h1>기록을 불러오지 못했어요</h1>
+        <p>네트워크 상태를 확인한 뒤 다시 시도해 주세요.</p>
+      </div>
+    )
   }
 
   if (readings.length === 0) {

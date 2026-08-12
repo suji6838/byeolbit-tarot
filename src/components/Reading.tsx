@@ -1,10 +1,19 @@
-import { useState } from 'react'
+import { KeyboardEvent, useState } from 'react'
 import { SPREADS, Spread, TarotCard, drawCards } from '../data'
 import TarotCardView from './TarotCardView'
 import { InsufficientCoinsError, fetchAiInterpretation } from '../lib/interpret'
 import { Reading as ReadingRecord, saveReading } from '../lib/readings'
 
 type DrawnCard = { card: TarotCard; reversed: boolean }
+
+function activateOnKey(handler: () => void) {
+  return (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handler()
+    }
+  }
+}
 
 function buildBaseInterpretation(spread: Spread, drawn: DrawnCard[]): string {
   return drawn
@@ -220,7 +229,9 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge }: Pr
           <div
             className={`deck-pile${questionRequired ? ' disabled' : ''}`}
             onClick={revealNext}
+            onKeyDown={activateOnKey(revealNext)}
             role="button"
+            tabIndex={questionRequired ? -1 : 0}
             aria-disabled={questionRequired}
             aria-label="카드 뽑기"
           >
@@ -247,7 +258,9 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge }: Pr
                   key={idx}
                   className={`fan-card${questionRequired ? ' disabled' : ''}`}
                   onClick={() => pickFanCard(idx, drawn.length)}
+                  onKeyDown={activateOnKey(() => pickFanCard(idx, drawn.length))}
                   role="button"
+                  tabIndex={questionRequired ? -1 : 0}
                   aria-disabled={questionRequired}
                   aria-label="카드 선택"
                 >

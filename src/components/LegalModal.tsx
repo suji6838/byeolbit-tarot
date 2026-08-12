@@ -1,4 +1,5 @@
 import { LEGAL_EFFECTIVE_DATE, LegalSection, PRIVACY_SECTIONS, TERMS_SECTIONS } from '../legal'
+import { useEscapeKey } from '../lib/useEscapeKey'
 
 type Props = { doc: 'terms' | 'privacy'; onClose: () => void }
 
@@ -6,6 +7,7 @@ const titles: Record<Props['doc'], string> = { terms: '이용약관', privacy: '
 const sections: Record<Props['doc'], LegalSection[]> = { terms: TERMS_SECTIONS, privacy: PRIVACY_SECTIONS }
 
 export default function LegalModal({ doc, onClose }: Props) {
+  useEscapeKey(onClose)
   return (
     <div className="modal-backdrop" role="presentation" onClick={onClose}>
       <section className="auth-modal legal-modal" role="dialog" aria-modal="true" aria-labelledby="legal-title" onClick={(e) => e.stopPropagation()}>
