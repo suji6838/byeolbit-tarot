@@ -21,7 +21,7 @@ export default function ChargeModal({ onClose }: { onClose: () => void }) {
       return
     }
     if (!referenceNote.trim()) {
-      setError('입금자명 또는 주문번호를 입력해 주세요.')
+      setError('입금자명을 입력해 주세요.')
       return
     }
     setSubmitting(true)
@@ -61,11 +61,11 @@ export default function ChargeModal({ onClose }: { onClose: () => void }) {
         </div>
         <form onSubmit={submit} noValidate>
           <label>
-            2. 결제하셨다면 입금자명 또는 주문번호를 입력해 주세요 (관리자 확인 후 코인이 충전돼요)
+            2. 결제하셨다면 입금자명을 입력해 주세요 (관리자 확인 후 코인이 충전돼요)
             <input
               value={referenceNote}
               onChange={(e) => setReferenceNote(e.target.value)}
-              placeholder="예: 홍길동 또는 주문번호"
+              placeholder="예: 홍길동"
               maxLength={100}
               disabled={!visitedPaymentPage || completed}
             />

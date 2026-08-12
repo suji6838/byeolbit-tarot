@@ -25,7 +25,7 @@ export default async function handler(req, res) {
 
   const { referenceNote } = req.body ?? {}
   const cleanNote = typeof referenceNote === 'string' ? referenceNote.trim().slice(0, MAX_NOTE_LENGTH) : ''
-  if (!cleanNote) return res.status(400).json({ error: '입금자명 또는 주문번호를 입력해 주세요.' })
+  if (!cleanNote) return res.status(400).json({ error: '입금자명을 입력해 주세요.' })
   const { coins, amount } = COIN_PACKAGE
 
   const admin = createClient(SUPABASE_URL, serviceRoleKey)
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
             '결제 확인 요청이 도착했어요. 리틀리 판매내역과 대조한 뒤 관리자 페이지에서 승인해 주세요.',
             '',
             `요청자 이메일: ${user.email}`,
-            `입금자명/주문번호: ${cleanNote}`,
+            `입금자명: ${cleanNote}`,
             `코인: ${coins}개 / 금액: ${amount.toLocaleString()}원`,
             `요청 시각: ${inserted.created_at}`,
             '',

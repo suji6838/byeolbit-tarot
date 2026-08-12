@@ -14,7 +14,7 @@ export const ADMIN_EMAIL = 'joan6838@gmail.com'
 export const COIN_PACKAGE = { coins: 10, amount: 2900 }
 
 // 리틀리 판매 페이지 링크 (사업자등록 전이라 개인 판매자로 진행, 결제는 리틀리에서 하고
-// 앱에는 입금자명/주문번호만 입력받아 수동 승인함).
+// 앱에는 입금자명만 입력받아 수동 승인함).
 export const LITT_PRODUCT_URL = 'https://litt.ly/byeolbittarot'
 
 // 문의하기 연락처 (하단 푸터에 텍스트로 표시).
