@@ -151,7 +151,9 @@ export default function App() {
 
       {showCharge && <ChargeModal onClose={closeCharge} />}
 
-      {showAdminCharges && <AdminCharges onClose={() => setShowAdminCharges(false)} />}
+      {showAdminCharges && (
+        <AdminCharges onClose={() => setShowAdminCharges(false)} onBalanceChange={refreshCoins} />
+      )}
 
       {showResetPassword && (
         <ResetPassword

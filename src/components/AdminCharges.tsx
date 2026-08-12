@@ -8,7 +8,9 @@ const statusLabel: Record<ChargeRecord['status'], string> = {
   rejected: '거절됨',
 }
 
-export default function AdminCharges({ onClose }: { onClose: () => void }) {
+type Props = { onClose: () => void; onBalanceChange: () => void }
+
+export default function AdminCharges({ onClose, onBalanceChange }: Props) {
   useEscapeKey(onClose)
   const [records, setRecords] = useState<ChargeRecord[] | null>(null)
   const [error, setError] = useState('')
@@ -24,13 +26,19 @@ export default function AdminCharges({ onClose }: { onClose: () => void }) {
     load()
   }, [])
 
-  const runAction = async (id: string, confirmMessage: string | null, action: (id: string) => Promise<void>) => {
+  const runAction = async (
+    id: string,
+    confirmMessage: string | null,
+    action: (id: string) => Promise<void>,
+    changesBalance: boolean
+  ) => {
     if (confirmMessage && !window.confirm(confirmMessage)) return
     setBusyId(id)
     setError('')
     try {
       await action(id)
       load()
+      if (changesBalance) onBalanceChange()
     } catch (err) {
       setError(err instanceof Error ? err.message : '처리 실패')
     } finally {
@@ -68,14 +76,14 @@ export default function AdminCharges({ onClose }: { onClose: () => void }) {
                     <button
                       className="secondary-button"
                       disabled={busyId === r.id}
-                      onClick={() => runAction(r.id, null, approveCharge)}
+                      onClick={() => runAction(r.id, null, approveCharge, true)}
                     >
                       승인 (코인 지급)
                     </button>
                     <button
                       className="secondary-button"
                       disabled={busyId === r.id}
-                      onClick={() => runAction(r.id, '결제 기록이 확인되지 않았나요? 요청을 거절합니다.', rejectCharge)}
+                      onClick={() => runAction(r.id, '결제 기록이 확인되지 않았나요? 요청을 거절합니다.', rejectCharge, false)}
                     >
                       거절
                     </button>
@@ -103,7 +111,7 @@ export default function AdminCharges({ onClose }: { onClose: () => void }) {
                           <button
                             className="secondary-button"
                             disabled={busyId === r.id}
-                            onClick={() => runAction(r.id, '결제 기록이 없는 게 확인됐나요? 코인을 회수합니다.', revokeCharge)}
+                            onClick={() => runAction(r.id, '결제 기록이 없는 게 확인됐나요? 코인을 회수합니다.', revokeCharge, true)}
                           >
                             결제 기록 없음 - 회수
                           </button>
