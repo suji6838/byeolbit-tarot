@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { GOOGLE_CLIENT_ID } from '../config'
 import { supabase } from '../lib/supabase'
+import { deleteAccount } from '../lib/account'
 import { useEscapeKey } from '../lib/useEscapeKey'
 import LegalModal from './LegalModal'
 
@@ -117,6 +118,21 @@ export default function Auth({ onClose, onComplete, member, onLogout }: Props) {
         setSubmitting(false)
       }
     }
+    const withdraw = async () => {
+      if (!window.confirm('정말 탈퇴하시겠어요? 상담 기록과 코인을 포함한 모든 정보가 영구적으로 삭제되며 되돌릴 수 없어요.')) return
+      setError('')
+      setSubmitting(true)
+      try {
+        await deleteAccount()
+        window.google?.accounts?.id?.disableAutoSelect()
+        await onLogout()
+        onClose()
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '탈퇴 처리에 실패했어요.')
+      } finally {
+        setSubmitting(false)
+      }
+    }
     return (
       <div className="modal-backdrop" role="presentation" onClick={onClose}>
         <section className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={(e) => e.stopPropagation()}>
@@ -125,7 +141,11 @@ export default function Auth({ onClose, onComplete, member, onLogout }: Props) {
           {member.picture && <img src={member.picture} alt="" className="member-avatar-lg" referrerPolicy="no-referrer" />}
           <h1 id="auth-title">{member.name}님,<br /><em>안녕하세요.</em></h1>
           <p className="auth-copy">{member.email}으로 로그인되어 있어요. 상담 기록이 계정에 안전하게 저장돼요.</p>
+          {error && <p className="form-error" role="alert">{error}</p>}
           <button className="google-button" type="button" onClick={logout} disabled={submitting}>{submitting ? '로그아웃하는 중이에요' : '로그아웃'}</button>
+          <button className="text-button danger-text" type="button" onClick={withdraw} disabled={submitting}>
+            회원 탈퇴
+          </button>
           <p className="legal-footer-links">
             <button type="button" onClick={() => setLegalView('terms')}>이용약관</button><span>·</span>
             <button type="button" onClick={() => setLegalView('privacy')}>개인정보처리방침</button>

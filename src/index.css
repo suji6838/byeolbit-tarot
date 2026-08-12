@@ -18,6 +18,7 @@ em{font-style:normal;color:var(--color-primary)}
 .primary-button:disabled{opacity:.5;cursor:default;box-shadow:none}
 .secondary-button{border:1px solid var(--line);background:var(--color-surface);color:var(--color-text);border-radius:14px;padding:14px 20px;font-weight:700}
 .text-button{border:0;background:transparent;color:var(--color-muted);font-size:12px;text-decoration:underline}
+.text-button.danger-text{color:#e39a9a;display:block;margin-top:10px}
 .spread-grid{display:grid;gap:14px;margin-top:10px}
 .spread-card{background:var(--color-surface);border:1px solid var(--line);border-radius:20px;padding:20px;text-align:left;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow);transition:.15s}
 .spread-card:hover{border-color:var(--color-primary);transform:translateY(-2px)}
