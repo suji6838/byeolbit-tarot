@@ -183,6 +183,11 @@ export default function Reading({ loggedIn, coins, onRequireAuth, onRequireCharg
         <span className="eyebrow">별빛마음상담소</span>
         <h1>오늘은 어떤 이야기를<br /><em>들어볼까요?</em></h1>
         <p className="subcopy">마음에 담아온 질문에 맞는 스프레드를 골라주세요.</p>
+        <div className="usage-info">
+          <span className="usage-info-title">✨ 별빛 타로 이용 안내</span>
+          <p>한 번의 스프레드로 지금 가장 궁금한 마음을 확인해보세요.</p>
+          <p className="usage-info-price">1회 리딩 10코인 | 10코인 2,900원</p>
+        </div>
         <div className="spread-grid">
           {SPREADS.map((s) => (
             <button key={s.id} className="spread-card" onClick={() => chooseSpread(s)}>
