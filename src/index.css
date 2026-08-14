@@ -31,6 +31,9 @@ em{font-style:normal;color:var(--color-primary)}
 .question-box textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:14px;padding:14px;font:inherit;color:var(--color-text);background:var(--color-surface);resize:vertical}
 .question-box textarea:focus{outline:2px solid var(--color-primary);border-color:transparent}
 .question-box .hint{color:var(--color-muted);font-size:11px;margin-top:6px}
+.coin-notice{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;background:var(--color-accent);border:1px solid var(--color-primary);border-radius:14px;padding:12px 15px;margin:0 0 20px}
+.coin-notice p{margin:0;color:var(--color-text);font-size:12.5px;line-height:1.55}
+.coin-notice .text-button{color:var(--color-primary);font-weight:800;white-space:nowrap}
 .deck-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:20px 0 10px;text-align:center}
 .deck-pile{position:relative;width:120px;height:180px;cursor:pointer}
 .deck-pile.disabled{cursor:not-allowed;opacity:.45}

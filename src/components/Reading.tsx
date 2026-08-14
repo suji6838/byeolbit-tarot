@@ -3,6 +3,7 @@ import { SPREADS, Spread, TarotCard, drawCards } from '../data'
 import TarotCardView from './TarotCardView'
 import { InsufficientCoinsError, fetchAiInterpretation } from '../lib/interpret'
 import { Reading as ReadingRecord, saveReading, updateReadingAiInterpretation } from '../lib/readings'
+import { hasUsedFreeAiToday } from '../lib/wallet'
 
 type DrawnCard = { card: TarotCard; reversed: boolean }
 
@@ -27,18 +28,20 @@ function buildBaseInterpretation(spread: Spread, drawn: DrawnCard[]): string {
 
 type Props = {
   loggedIn: boolean
+  coins: number | null
   onRequireAuth: () => void
   onRequireCharge: () => void
   onCoinsChange: (coins: number) => void
 }
 
-export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCoinsChange }: Props) {
+export default function Reading({ loggedIn, coins, onRequireAuth, onRequireCharge, onCoinsChange }: Props) {
   const [spread, setSpread] = useState<Spread | null>(null)
   const [question, setQuestion] = useState('')
   const [preparedDraw, setPreparedDraw] = useState<DrawnCard[] | null>(null)
   const [revealCount, setRevealCount] = useState(0)
   const [fanPool, setFanPool] = useState<DrawnCard[] | null>(null)
   const [pickedIndices, setPickedIndices] = useState<number[]>([])
+  const [freeUsedToday, setFreeUsedToday] = useState(false)
   const [aiText, setAiText] = useState<string | null>(null)
   const [aiMethod, setAiMethod] = useState<'free' | 'paid' | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
@@ -59,6 +62,11 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCo
     setInsufficientCoins(false)
     setSaved(false)
     setCurrentReadingId(null)
+    if (loggedIn) {
+      void hasUsedFreeAiToday().then(setFreeUsedToday)
+    } else {
+      setFreeUsedToday(false)
+    }
   }
 
   const chooseSpread = (s: Spread) => {
@@ -223,6 +231,13 @@ export default function Reading({ loggedIn, onRequireAuth, onRequireCharge, onCo
             maxLength={500}
           />
           <p className="hint">질문을 입력해야 카드를 뽑을 수 있어요.</p>
+        </div>
+      )}
+
+      {!allRevealed && loggedIn && freeUsedToday && (coins ?? 0) < 10 && (
+        <div className="coin-notice">
+          <p>오늘의 무료 상담은 이미 사용했어요. 이번 카드 결과의 별빛 상담사 해석을 보려면 코인이 필요해요.</p>
+          <button className="text-button" type="button" onClick={onRequireCharge}>코인 충전하기</button>
         </div>
       )}
 

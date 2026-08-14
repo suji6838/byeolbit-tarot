@@ -138,6 +138,7 @@ export default function App() {
         <Reading
           key={readingResetKey}
           loggedIn={!!member}
+          coins={coins}
           onRequireAuth={() => setShowAuth(true)}
           onRequireCharge={chargeCoins}
           onCoinsChange={setCoins}
