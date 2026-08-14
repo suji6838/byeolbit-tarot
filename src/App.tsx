@@ -7,8 +7,9 @@ import ChargeModal from './components/ChargeModal'
 import AdminCharges from './components/AdminCharges'
 import ResetPassword from './components/ResetPassword'
 import LegalModal from './components/LegalModal'
+import ContactModal from './components/ContactModal'
 import { getCoinBalance } from './lib/wallet'
-import { ADMIN_EMAIL, CONTACT_EMAIL } from './config'
+import { ADMIN_EMAIL } from './config'
 
 type Tab = 'reading' | 'history'
 type Member = { name: string; email: string; picture?: string }
@@ -24,7 +25,7 @@ export default function App() {
   const [coins, setCoins] = useState<number | null>(null)
   const [showResetPassword, setShowResetPassword] = useState(false)
   const [legalView, setLegalView] = useState<'terms' | 'privacy' | null>(null)
-  const [contactRevealed, setContactRevealed] = useState(false)
+  const [showContact, setShowContact] = useState(false)
   const [showWithdrawnToast, setShowWithdrawnToast] = useState(false)
 
   const goHome = () => {
@@ -147,11 +148,7 @@ export default function App() {
       <footer className="site-footer legal-footer-links">
         <button type="button" onClick={() => setLegalView('terms')}>이용약관</button><span>·</span>
         <button type="button" onClick={() => setLegalView('privacy')}>개인정보처리방침</button><span>·</span>
-        {contactRevealed ? (
-          <span className="contact-email">{CONTACT_EMAIL}</span>
-        ) : (
-          <button type="button" onClick={() => setContactRevealed(true)}>문의하기</button>
-        )}
+        <button type="button" onClick={() => setShowContact(true)}>문의하기</button>
       </footer>
 
       <nav className="tabbar">
@@ -192,6 +189,8 @@ export default function App() {
       )}
 
       {legalView && <LegalModal doc={legalView} onClose={() => setLegalView(null)} />}
+
+      {showContact && <ContactModal onClose={() => setShowContact(false)} />}
 
       {showWithdrawnToast && (
         <div className="toast" role="status">
