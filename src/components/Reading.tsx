@@ -185,8 +185,8 @@ export default function Reading({ loggedIn, coins, onRequireAuth, onRequireCharg
         <p className="subcopy">마음에 담아온 질문에 맞는 스프레드를 골라주세요.</p>
         <div className="usage-info">
           <span className="usage-info-title">✨ 별빛 타로 이용 안내</span>
-          <p>한 번의 스프레드로 지금 가장 궁금한 마음을 확인해보세요.</p>
-          <p className="usage-info-price">1회 리딩 10코인 | 10코인 2,900원</p>
+          <p>매일 한 번, 무료로 타로를 만나보세요.</p>
+          <p className="usage-info-price">더 깊이 들여다보고 싶다면 1회 10코인(2,900원)으로 추가 리딩을 이용할 수 있어요.</p>
         </div>
         <div className="spread-grid">
           {SPREADS.map((s) => (
